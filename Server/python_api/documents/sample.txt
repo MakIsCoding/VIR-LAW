@@ -1,0 +1,10 @@
+A contract is a legally binding agreement between two or more parties. For a contract to be valid and enforceable, several essential elements must generally be present. These include:
+
+1.  **Offer:** A clear proposal by one party to another to enter into an agreement.
+2.  **Acceptance:** The unqualified agreement to the terms of the offer. This must be communicated to the offeror.
+3.  **Consideration:** Something of value exchanged between the parties. It can be a promise to do something, a promise not to do something, goods, services, or money. It doesn't have to be equal in value, but it must be something of legal value.
+4.  **Mutual Assent (Meeting of the Minds):** Both parties must agree to the same terms in the same sense.
+5.  **Legal Capacity:** The parties must be legally competent to enter into a contract (e.g., not minors, not severely mentally incapacitated).
+6.  **Lawful Object:** The purpose of the contract must be legal and not against public policy.
+
+Contracts can be written, oral, or implied by conduct. However, some types of contracts, such as those involving real estate or those that cannot be performed within one year, may be required by law (Statute of Frauds) to be in writing to be enforceable. Breach of contract occurs when one party fails to fulfill their obligations as specified in the agreement, which can lead to remedies such as damages or specific performance.

@@ -7,7 +7,11 @@ const MainLayout = ({
   user,
   isSidebarOpen,
   setIsSidebarOpen,
-  activeQueryIdFromUrl, // Needed for highlighting in Sidebar
+  onNewQueryClick,
+  recentQueries,
+  onRecentQueryClick,
+  loadingRecentQueries,
+  activeQueryIdFromUrl, // <--- NEW PROP: Receive from App.jsx
   children,
 }) => {
   const toggleSidebar = () => {
@@ -16,28 +20,37 @@ const MainLayout = ({
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-800">
-      {/* Sidebar Component */}
+      {/* Sidebar Component (handles its own responsive positioning internally) */}
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={toggleSidebar}
+        onNewQueryClick={onNewQueryClick}
+        recentQueries={recentQueries}
+        onRecentQueryClick={onRecentQueryClick}
         user={user}
-        activeQueryIdFromUrl={activeQueryIdFromUrl}
+        activeQueryIdFromUrl={activeQueryIdFromUrl} // <--- Pass it down to Sidebar
       />
 
-      {/* Main content area */}
-      <div className="flex flex-col flex-1 min-w-0 h-full transition-all duration-300 ease-in-out">
+      {/* Main Content Area Container (Header + Main Content) */}
+      <div
+        className={`flex flex-col flex-1 min-w-0 h-full
+          transition-all duration-300 ease-in-out`}
+      >
+        {/* Header - Stays at the top of the main content area */}
         <Header onToggleSidebar={toggleSidebar} user={user} />
+
+        {/* Main Content Area - Takes up remaining vertical space */}
         <main className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           {children}
         </main>
       </div>
 
-      {/* Mobile overlay when sidebar is open */}
+      {/* Overlay for small screens when sidebar is open */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={toggleSidebar}
-        />
+          onClick={toggleSidebar} // Click outside to close sidebar on mobile
+        ></div>
       )}
     </div>
   );
