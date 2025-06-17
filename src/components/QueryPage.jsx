@@ -11,8 +11,9 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
-  getDoc, // Import getDoc to fetch a single document
+  getDoc,
 } from "firebase/firestore";
+import axios from "axios"; // Import axios for making HTTP requests to your Flask backend
 
 const QueryPage = () => {
   const { queryId } = useParams();
@@ -26,6 +27,9 @@ const QueryPage = () => {
   const [sessionLoadError, setSessionLoadError] = useState(null); // For session loading errors
   const [sendMessageError, setSendMessageError] = useState(null); // New state for send message errors
   const messagesEndRef = useRef(null);
+
+  // New state to temporarily hold a message that needs to be sent AFTER a new session is created
+  const [pendingMessage, setPendingMessage] = useState(null);
 
   const currentUserId = auth.currentUser?.uid; // Get UID safely
 
@@ -105,10 +109,13 @@ const QueryPage = () => {
             ...doc.data(), // message text, sender, createdAt
           }));
           setMessages(loadedMessages);
+          console.log(
+            "Firestore onSnapshot updated messages state:",
+            loadedMessages
+          ); // Console: Verify messages loaded from Firestore
         },
         (error) => {
           console.error("Error fetching messages for session:", error);
-          // Do not set global error, as session info might still be valid
         }
       );
 
@@ -131,49 +138,249 @@ const QueryPage = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+    console.log("Current messages state (after render/scroll):", messages); // Console: Verify current messages state
   }, [messages]); // Scroll when messages change
+
+  // NEW useEffect to handle sending the pending message once queryId is stable
+  useEffect(() => {
+    // Only proceed if there's a pending message, queryId is valid (not 'new' or undefined), and session isn't loading
+    if (
+      pendingMessage &&
+      queryId !== "new" &&
+      queryId !== undefined &&
+      !isSessionLoading &&
+      currentUserId
+    ) {
+      console.log(
+        "DEBUG useEffect: Processing pending message for new session:",
+        queryId
+      );
+      const sendMessageToFirestore = async () => {
+        try {
+          const sessionDocRef = doc(
+            db,
+            "users",
+            currentUserId,
+            "querySessions",
+            queryId // Now queryId is guaranteed to be the actual session ID
+          );
+
+          const docSnap = await getDoc(sessionDocRef);
+          console.log("DEBUG useEffect: docSnap.exists():", docSnap.exists());
+          if (docSnap.exists()) {
+            console.log(
+              "DEBUG useEffect: docSnap.data().title:",
+              docSnap.data().title
+            );
+            if (docSnap.data().title === "New Chat") {
+              const updatedTitle =
+                pendingMessage.substring(0, 50) +
+                (pendingMessage.length > 50 ? "..." : "");
+              await updateDoc(sessionDocRef, {
+                title: updatedTitle,
+                lastUpdated: serverTimestamp(),
+              });
+              setSessionTitle(updatedTitle);
+              console.log(
+                "DEBUG useEffect: Session title updated in useEffect to:",
+                updatedTitle
+              );
+            } else {
+              await updateDoc(sessionDocRef, {
+                lastUpdated: serverTimestamp(),
+              });
+              console.log(
+                "DEBUG useEffect: Session lastUpdated field updated in useEffect."
+              );
+            }
+          }
+
+          // Add the user's message to the messages subcollection in Firestore
+          await addDoc(
+            collection(
+              db,
+              "users",
+              currentUserId,
+              "querySessions",
+              queryId,
+              "messages"
+            ),
+            {
+              text: pendingMessage,
+              sender: "user",
+              createdAt: serverTimestamp(),
+            }
+          );
+          console.log(
+            "DEBUG useEffect: User message added to Firestore via useEffect."
+          );
+
+          // --- START RAG INTEGRATION (Moved here) ---
+          setIsLoadingResponse(true);
+          console.log(
+            "DEBUG useEffect: AI typing indicator set to true in useEffect."
+          );
+
+          let aiResponseText =
+            "An error occurred while getting a response from VirLaw AI.";
+          try {
+            console.log(
+              "DEBUG useEffect: Sending prompt to Flask backend from useEffect:",
+              pendingMessage
+            );
+            const ragResponse = await axios.post(
+              "http://localhost:8000/gemini-rag",
+              {
+                prompt: pendingMessage,
+              }
+            );
+            aiResponseText = ragResponse.data.response;
+            console.log(
+              "DEBUG useEffect: AI response received from Flask in useEffect:",
+              aiResponseText
+            );
+          } catch (ragError) {
+            console.error(
+              "ERROR useEffect: Error calling Python RAG API in useEffect:",
+              ragError
+            );
+            if (ragError.response) {
+              aiResponseText = `VirLaw AI: Failed to get a response (Code: ${ragError.response.status}). Please check the Python backend.`;
+            } else if (ragError.request) {
+              aiResponseText =
+                "VirLaw AI: No response from the AI server. Is the Python backend running?";
+            } else {
+              aiResponseText = `VirLaw AI: Error sending request: ${ragError.message}`;
+            }
+            setSendMessageError(aiResponseText);
+          } finally {
+            setIsLoadingResponse(false);
+            console.log(
+              "DEBUG useEffect: AI typing indicator set to false in useEffect."
+            );
+          }
+
+          await addDoc(
+            collection(
+              db,
+              "users",
+              currentUserId,
+              "querySessions",
+              queryId,
+              "messages"
+            ),
+            {
+              text: aiResponseText,
+              sender: "bot",
+              createdAt: serverTimestamp(),
+            }
+          );
+          console.log(
+            "DEBUG useEffect: AI message added to Firestore via useEffect."
+          );
+          // --- END RAG INTEGRATION ---
+        } catch (error) {
+          console.error(
+            "ERROR useEffect: Error processing pending message in useEffect:",
+            error
+          );
+          setSendMessageError(
+            "Failed to send message or save session after creation. Please try again."
+          );
+          setIsLoadingResponse(false);
+        } finally {
+          setPendingMessage(null); // Clear the pending message after processing
+        }
+      };
+
+      sendMessageToFirestore();
+    }
+  }, [pendingMessage, queryId, isSessionLoading, currentUserId, db, navigate]); // Add db and navigate to dependencies
 
   // Handler for sending a message (user or AI)
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!input.trim() || !currentUserId) return; // Prevent sending empty messages or if no user
+    if (!input.trim() || !currentUserId) {
+      if (!currentUserId) {
+        setSendMessageError("You must be logged in to send messages.");
+      }
+      return;
+    }
 
-    const userMessageText = input; // Store input value
-    setInput(""); // Clear input field immediately after capturing value
-    setSendMessageError(null); // Clear previous send message errors
+    const userMessageText = input;
+    console.log(
+      "User input captured:",
+      userMessageText,
+      typeof userMessageText
+    );
+    setInput("");
+    setSendMessageError(null);
 
-    // OPTIMISTIC UI UPDATE: Add user message to local state immediately for instant display
+    // Optimistic UI update for the user's message
     const tempUserMessage = {
-      id: "temp-" + Date.now(), // Unique temporary ID for immediate rendering
+      id: "temp-" + Date.now(),
       text: userMessageText,
       sender: "user",
-      createdAt: new Date(), // Client-side timestamp for quick display
+      createdAt: new Date(),
     };
     setMessages((prevMessages) => [...prevMessages, tempUserMessage]);
+    console.log("Optimistic UI: User message added to local state.");
 
-    let currentSessionFirestoreId = queryId; // This will hold the actual Firestore session ID
-
-    try {
-      // If it's a new query (URL is /dashboard/new), create the session document first
-      if (queryId === "new") {
+    // If it's a new session, create it and navigate. The rest will be handled by useEffect.
+    if (!queryId || queryId === "new") {
+      console.log(
+        "DEBUG handleSendMessage: Entered 'create new session' block."
+      ); // NEW LOG
+      try {
+        console.log(
+          "DEBUG handleSendMessage: Attempting to add new session document to Firestore..."
+        ); // NEW LOG
         const newSessionRef = await addDoc(
           collection(db, "users", currentUserId, "querySessions"),
           {
-            title: "New Chat", // Initial title, will be updated below
+            title: "New Chat",
             createdAt: serverTimestamp(),
             lastUpdated: serverTimestamp(),
           }
         );
-        currentSessionFirestoreId = newSessionRef.id;
-        // Update URL to the real session ID for persistence and navigation
-        navigate(`/dashboard/${currentSessionFirestoreId}`);
+        const newSessionId = newSessionRef.id;
         console.log(
-          "New session created from QueryPage with ID:",
-          currentSessionFirestoreId
+          "DEBUG handleSendMessage: New session document added. ID:",
+          newSessionId
+        ); // NEW LOG
+
+        setPendingMessage(userMessageText); // Store the message to be processed after navigation
+        console.log(
+          "DEBUG handleSendMessage: Pending message set. About to navigate."
+        ); // NEW LOG
+        navigate(`/dashboard/${newSessionId}`, { replace: true }); // Navigate to the new session
+        console.log(
+          "DEBUG handleSendMessage: Navigation initiated to new session ID:",
+          newSessionId
+        ); // This might not appear if navigation causes an immediate unmount
+      } catch (error) {
+        console.error(
+          "ERROR handleSendMessage: Failed to create new session:",
+          error
+        ); // NEW LOG
+        setSendMessageError("Failed to create new session. Please try again.");
+        setIsLoadingResponse(false);
+        // Remove the optimistically added message if session creation failed
+        setMessages((prevMessages) =>
+          prevMessages.filter((msg) => msg.id !== tempUserMessage.id)
         );
       }
+      return; // Exit here, useEffect will handle message sending after navigation
+    }
 
-      // Now, for ANY session (newly created or existing), update its title if it's still generic
+    // If it's an existing session, proceed directly to send the message
+    // This part is for subsequent messages in an already existing session
+    console.log(
+      "DEBUG handleSendMessage: Handling message for existing session."
+    ); // NEW LOG
+    let currentSessionFirestoreId = queryId; // This should already be valid
+
+    try {
       const sessionDocRef = doc(
         db,
         "users",
@@ -182,25 +389,34 @@ const QueryPage = () => {
         currentSessionFirestoreId
       );
 
-      // Fetch the current session document to check its title
-      const docSnap = await getDoc(sessionDocRef); // Use getDoc to fetch once
+      const docSnap = await getDoc(sessionDocRef);
+      console.log("docSnap.exists():", docSnap.exists());
+      if (docSnap.exists()) {
+        console.log("docSnap.data():", docSnap.data());
+        console.log(
+          "docSnap.data().title:",
+          docSnap.data().title,
+          typeof docSnap.data().title
+        );
 
-      // If the session exists and its title is still the generic "New Chat"
-      if (docSnap.exists() && docSnap.data().title === "New Chat") {
-        const updatedTitle =
-          userMessageText.substring(0, 50) +
-          (userMessageText.length > 50 ? "..." : "");
-        await updateDoc(sessionDocRef, {
-          title: updatedTitle,
-          lastUpdated: serverTimestamp(),
-        });
-        setSessionTitle(updatedTitle); // Update local state for immediate display
-      } else {
-        // If the title was already updated or it's an old session, just update lastUpdated
-        await updateDoc(sessionDocRef, { lastUpdated: serverTimestamp() });
+        if (docSnap.data().title === "New Chat") {
+          // Should ideally not happen for existing sessions, but as a fallback
+          const updatedTitle =
+            userMessageText.substring(0, 50) +
+            (userMessageText.length > 50 ? "..." : "");
+          await updateDoc(sessionDocRef, {
+            title: updatedTitle,
+            lastUpdated: serverTimestamp(),
+          });
+          setSessionTitle(updatedTitle);
+          console.log("Session title updated to:", updatedTitle);
+        } else {
+          await updateDoc(sessionDocRef, { lastUpdated: serverTimestamp() });
+          console.log("Session lastUpdated field updated.");
+        }
       }
 
-      // Add the user's message to the messages subcollection in Firestore
+      // Add the user's message to Firestore for existing session
       await addDoc(
         collection(
           db,
@@ -213,43 +429,77 @@ const QueryPage = () => {
         {
           text: userMessageText,
           sender: "user",
-          createdAt: serverTimestamp(), // Use server timestamp for the actual database record
+          createdAt: serverTimestamp(),
         }
       );
+      console.log("User message added to Firestore for existing session.");
 
-      // Now that the user's message is sent/displayed, indicate that AI is "thinking"
+      // --- START RAG INTEGRATION (for existing sessions) ---
       setIsLoadingResponse(true);
+      console.log("AI typing indicator set to true.");
 
-      // Simulate AI response (THIS IS WHERE YOU'D REPLACE WITH ACTUAL LLM API CALL)
-      setTimeout(async () => {
-        const aiResponse = {
-          text: `VirLaw AI: I received your query "${userMessageText}". Analyzing now...`, // Temporary AI response
+      let aiResponseText =
+        "An error occurred while getting a response from VirLaw AI.";
+      try {
+        console.log("Sending prompt to Flask backend:", userMessageText);
+        const ragResponse = await axios.post(
+          "http://localhost:8000/gemini-rag",
+          {
+            prompt: userMessageText,
+          }
+        );
+        aiResponseText = ragResponse.data.response;
+        console.log("AI response received from Flask:", aiResponseText);
+      } catch (ragError) {
+        console.error("Error calling Python RAG API:", ragError);
+        if (ragError.response) {
+          aiResponseText = `VirLaw AI: Failed to get a response (Code: ${ragError.response.status}). Please check the Python backend.`;
+        } else if (ragError.request) {
+          aiResponseText =
+            "VirLaw AI: No response from the AI server. Is the Python backend running?";
+        } else {
+          aiResponseText = `VirLaw AI: Error sending request: ${ragError.message}`;
+        }
+        setSendMessageError(aiResponseText);
+        console.error(
+          "Error with RAG API call, AI response set to:",
+          aiResponseText
+        );
+      } finally {
+        setIsLoadingResponse(false);
+        console.log("AI typing indicator set to false.");
+      }
+
+      await addDoc(
+        collection(
+          db,
+          "users",
+          currentUserId,
+          "querySessions",
+          currentSessionFirestoreId,
+          "messages"
+        ),
+        {
+          text: aiResponseText,
           sender: "bot",
           createdAt: serverTimestamp(),
-        };
-        try {
-          await addDoc(
-            collection(
-              db,
-              "users",
-              currentUserId,
-              "querySessions",
-              currentSessionFirestoreId,
-              "messages"
-            ),
-            aiResponse
-          );
-        } catch (error) {
-          console.error("Error adding AI message:", error);
-          setSendMessageError("Failed to get AI response."); // Display an error if AI message fails
-        } finally {
-          setIsLoadingResponse(false); // AI response processed, allow further user input
         }
-      }, 1000); // Simulate 1 second delay for AI response
+      );
+      console.log("AI message added to Firestore.");
+      // --- END RAG INTEGRATION ---
     } catch (error) {
-      console.error("Error in handleSendMessage:", error);
-      setIsLoadingResponse(false); // Re-enable input on error
-      setSendMessageError("Failed to send message. Please try again."); // Set an on-screen error
+      console.error(
+        "Error in handleSendMessage (Firebase or initial setup) for existing session:",
+        error
+      );
+      setIsLoadingResponse(false);
+      setSendMessageError(
+        "Failed to send message or save session. Please try again."
+      );
+      // Remove the optimistically added message if sending failed
+      setMessages((prevMessages) =>
+        prevMessages.filter((msg) => msg.id !== tempUserMessage.id)
+      );
     }
   };
 
