@@ -121,8 +121,7 @@ const SidebarContent = ({
                     (
                       queryItem // Changed 'query' to 'queryItem' to avoid conflict with the 'query' import from firestore
                     ) => (
-                      <li key={queryItem.id} className="mb-2">
-                        {" "}
+                      <li key={queryItem.id} className="mb-2 flex items-center justify-between">
                         <button
                           onClick={() => onRecentQueryClick(queryItem.id)}
                           className={`
@@ -136,10 +135,24 @@ const SidebarContent = ({
              }
 
             `}
-                        >
+                        >{" "}
+
+                          <div className="flex-grow truncate mr-2">
+                            {queryItem.title || "Untitled Query"}
+                          </div>
                           {" "}
-                          {queryItem.title || "Untitled Query"}{" "}
-                        </button>{" "}
+
+                        </button>
+                        {" "}
+
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onDeleteChat(queryItem.id); }}
+                            className="text-gray-400 hover:text-red-500 text-xs p-1 rounded"
+                          >
+                            Delete Chat
+                          </button>
+                        </div>
                       </li>
                     )
                   )}{" "}
