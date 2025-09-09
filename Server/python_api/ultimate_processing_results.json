@@ -1,0 +1,1347 @@
+{
+  "processing_summary": {
+    "total_documents": 1,
+    "failed_documents": 0,
+    "total_chunks": 33,
+    "total_tables": 0,
+    "total_images": 0,
+    "total_citations": 59,
+    "processing_time_seconds": 383.845292,
+    "throughput_docs_per_minute": 0.15631297621855422,
+    "last_processed": "2025-09-09T12:19:19.678472",
+    "success_rate": 100.0,
+    "storage_results": {
+      "texts": {
+        "stored": 0,
+        "errors": 33
+      },
+      "citations": {
+        "stored": 59,
+        "errors": 0
+      }
+    },
+    "documents_list": [
+      "fundamental rights.pdf"
+    ],
+    "document_index": {
+      "fundamental rights.pdf": {
+        "hash": "6f379f722a28af72086c78778c7c8c2d",
+        "last_modified": 1757266199.8631048
+      }
+    }
+  },
+  "detailed_results": {
+    "files_processed": [
+      "fundamental rights.pdf"
+    ],
+    "files_failed": [],
+    "total_content": {
+      "texts": [
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p1::c558a58f71::s0",
+          "content": "PART III\n\nFUNDAMENTAL RIGHTS\n\nGeneral\n\nDefinition.\n\n12. In this Part, unless the context otherwise requires, “the State’’ includes the Government and Parliament of India and the Government and the Legislature of each of the States and all local or other authorities within the territory of India or under the control of the Government of India.\n\nLaws inconsistent with or in derogation of the fundamental rights.\n\n13. (1) All laws in force in the territory of India immediately before the commencement of this Constitution, in so far as they are inconsistent with the provisions of this Part, shall, to the extent of such inconsistency, be void. (2) The State shall not make any law which takes away or abridges the rights conferred by this Part and any law made in contravention of this clause shall, to the extent of the contravention, be void.",
+          "metadata": {
+            "type": "text",
+            "page_number": 1,
+            "section_tag": "c558a58f71",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 846,
+            "estimated_tokens": 211,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p1::177efcf986::s1",
+          "content": "(3) In this article, unless the context otherwise\n\nrequires,—\n\n(a) “law” includes any Ordinance, order, bye-law, rule, regulation, notification, custom or usage having in the territory of India the force of law;\n\n(b) “laws in force” includes laws passed or made by a Legislature or other competent authority in the territory of India before the commencement of this Constitution and not previously repealed, notwithstanding that any such law or any part thereof may not be then in operation either at all or in particular areas.\n\n1[(4) Nothing in this article shall apply to any amendment of this Constitution made under article 368.]",
+          "metadata": {
+            "type": "text",
+            "page_number": 1,
+            "section_tag": "177efcf986",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 634,
+            "estimated_tokens": 158,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p1::right-to-equality::s2",
+          "content": "Right to Equality\n\nEquality before law.\n\n14. The State shall not deny to any person equality before the law or the equal protection of the laws within the territory of India.\n\n1Ins. by the Constitution (Twenty-fourth Amendment) Act, 1971, s. 2.\n\n6\n\nTHE CONSTITUTION OF INDIA\n\n(Part III.—Fundamental Rights.—Arts. 15-16.)\n\n15. (1) The State shall not discriminate against any citizen on grounds only of religion, race, caste, sex, place of birth or any of them. (2) No citizen shall, on grounds only of religion, race, caste, sex, place of birth or any of them, be subject to any disability, liability, restriction or condition with regard to—\n\nProhibition of discrimination on grounds of religion, race, caste, sex or place of birth.\n\n(a) access to shops, public restaurants, hotels and",
+          "metadata": {
+            "type": "text",
+            "page_number": 1,
+            "section_tag": "right-to-equality",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 786,
+            "estimated_tokens": 196,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p2::1e8dd52769::s3",
+          "content": "places of public entertainment; or\n\n(b) the use of wells, tanks, bathing ghats, roads and places of public resort maintained wholly or partly out of State funds or dedicated to the use of the general public.\n\n(3) Nothing in this article shall prevent the State from\n\nmaking any special provision for women and children.\n\n1[(4) Nothing in this article or in clause (2) of article 29 shall prevent the State from making any special provision for the advancement of any socially and educationally backward classes of citizens or for the Scheduled Castes and the Scheduled Tribes.]\n\n2[(5) Nothing in this article or in sub-clause (g) of clause (1) of article 19 shall prevent the State from making any special provision, by law, for the advancement of any socially and educationally backward classes of citizens or for the Scheduled Castes or the Scheduled Tribes in so far as such special provisions relate to their admission to educational institutions including private educational institutions, whether aided or unaided by the State, other than the minority educational institutions referred to in clause (1) of article 30.]\n\n16. (1) There shall be equality of opportunity for all citizens in matters relating to employment or appointment to any office under the State. (2) No citizen shall, on grounds only of religion, race, caste, sex, descent, place of birth, residence or any of them, be ineligible for, or discriminated against in respect of, any employment or office under the State.",
+          "metadata": {
+            "type": "text",
+            "page_number": 2,
+            "section_tag": "1e8dd52769",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1490,
+            "estimated_tokens": 372,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p2::0acae7b2c6::s4",
+          "content": "Equality of opportunity in matters of public employment.\n\n(3) Nothing in this article shall prevent Parliament from making any law prescribing, in regard to a class or classes of employment or appointment to an office\n\n1Added by the Constitution (First Amendment) Act, 1951, s. 2. 2Ins. by the Constitution (Ninety-third Amendment) Act, 2005, s. 2 (w.e.f. 20-1-2006).\n\n7\n\n8\n\nTHE CONSTITUTION OF INDIA\n\n(Part III.—Fundamental Rights.—Arts. 16—18.)\n\n1[under the Government of, or any local or other authority within, a State or Union territory, any requirement as to residence within that State or Union territory] prior to such employment or appointment.\n\n(4) Nothing in this article shall prevent the State from making any provision for the reservation of appointments or posts in favour of any backward class of citizens which, in the opinion of the State, is not adequately represented in the services under the State.\n\n2[(4A) Nothing in this article shall prevent the State from making any provision for reservation 3[in matters of promotion, with consequential seniority, to any class] or classes of posts in the services under the State in favour of the Scheduled Castes and the Scheduled Tribes which, in the opinion of the State, are not adequately represented in the services under the State.]",
+          "metadata": {
+            "type": "text",
+            "page_number": 2,
+            "section_tag": "0acae7b2c6",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1301,
+            "estimated_tokens": 325,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p2::0acae7b2c6::s5",
+          "content": "4[(4B) Nothing in this article shall prevent the State from considering any unfilled vacancies of a year which are reserved for being filled up in that year in accordance with any provision for reservation made under clause (4) or clause (4A) as a separate class of vacancies to be filled up in any succeeding year or years and such class of vacancies shall not be considered together with the vacancies of the year in which they are being filled up for determining the ceiling of fifty per cent. reservation on total number of vacancies of that year.]\n\n(5) Nothing in this article shall affect the operation of any law which provides that the incumbent of an office in connection with the affairs of any religious or denominational institution or any member of the governing body thereof shall be a person professing a particular religion or belonging to a particular denomination.",
+          "metadata": {
+            "type": "text",
+            "page_number": 2,
+            "section_tag": "0acae7b2c6",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 882,
+            "estimated_tokens": 220,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p3::2e2cd4aed3::s6",
+          "content": "Abolition of Untouchability.\n\n17. “Untouchability” is abolished and its practice in any form is forbidden. The enforcement of any disability arising out of “Untouchability” shall be an offence punishable in accordance with law.\n\nAbolition of titles.\n\n18. (1) No title, not being a military or academic\n\ndistinction, shall be conferred by the State.\n\n(2) No citizen of India shall accept any title from any\n\nforeign State.\n\n1Subs. by the Constitution (Seventh Amendment) Act, 1956, s. 29 and Sch., for “under any State specified in the First Schedule or any local or other authority within its territory, any requirement as to residence within that State”.\n\n2Ins. by the Constitution (Seventy-seventh Amendment) Act, 1995, s. 2. 3Subs. by the Constitution (Eighty-fifth Amendment) Act, 2001, s. 2, for certain words\n\n(w.e.f. 17-6-1995).\n\n4Ins. by the Constitution (Eighty-first Amendment) Act, 2000, s. 2 (w.e.f. 9-6-2000).\n\nTHE CONSTITUTION OF INDIA",
+          "metadata": {
+            "type": "text",
+            "page_number": 3,
+            "section_tag": "2e2cd4aed3",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 949,
+            "estimated_tokens": 237,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p4::69d37a9fd9::s7",
+          "content": "(Part III.—Fundamental Rights.—Arts. 18-19.)\n\n(3) No person who is not a citizen of India shall, while he holds any office of profit or trust under the State, accept without the consent of the President any title from any foreign State.\n\n(4) No person holding any office of profit or trust under the State shall, without the consent of the President, accept any present, emolument, or office of any kind from or under any foreign State.\n\nRight to Freedom\n\n19. (1) All citizens shall have the right—\n\n(a) to freedom of speech and expression; (b) to assemble peaceably and without arms; (c) to form associations or unions; (d) to move freely throughout the territory of India; (e) to reside and settle in any part of the territory\n\nProtection of certain rights regarding freedom of speech, etc.\n\nof India; 1[and] 2* * * * * (g) to practise any profession, or to carry on any\n\noccupation, trade or business. 3[(2) Nothing in sub-clause (a) of clause (1) shall affect the operation of any existing law, or prevent the State from making any law, in so far as such law imposes reasonable restrictions on the exercise of the right conferred by the said sub-clause in the interests of 4[the sovereignty and integrity of India,] the security of the State, friendly relations with foreign States, public order, decency or morality, or in relation to contempt of court, defamation or incitement to an offence.]\n\n(3) Nothing in sub-clause (b) of the said clause shall affect the operation of any existing law in so far as it imposes, or prevent the State from making any law imposing, in the interests of 4[the sovereignty and integrity of India or] public order, reasonable restrictions on the exercise of the right conferred by the said sub-clause.",
+          "metadata": {
+            "type": "text",
+            "page_number": 4,
+            "section_tag": "69d37a9fd9",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1738,
+            "estimated_tokens": 434,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p4::69d37a9fd9::s8",
+          "content": "(4) Nothing in sub-clause (c) of the said clause shall affect the operation of any existing law in so far as it imposes, or prevent the State from making any law imposing, in the interests of 4[the sovereignty and\n\n1Ins. by the Constitution (Forty-fourth Amendment) Act, 1978, s. 2 (w.e.f. 20-6-1979). 2Sub-clause (f) omitted by s. 2, ibid. (w.e.f. 20-6-1979). 3Subs. by the Constitution (First Amendment) Act, 1951, s. 3, for cl. (2) (with retrospective\n\neffect).\n\n4Ins. by the Constitution (Sixteenth Amendment) Act, 1963, s. 2.",
+          "metadata": {
+            "type": "text",
+            "page_number": 4,
+            "section_tag": "69d37a9fd9",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 530,
+            "estimated_tokens": 132,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p4::22dd7eea33::s9",
+          "content": "9\n\n10\n\nTHE CONSTITUTION OF INDIA\n\n(Part III.—Fundamental Rights.—Arts. 19—21.)\n\nintegrity of India or] public order or morality, reasonable restrictions on the exercise of the right conferred by the said sub-clause.\n\n(5) Nothing in 1[sub-clauses (d) and (e)] of the said clause shall affect the operation of any existing law in so far as it imposes, or prevent the State from making any law imposing, reasonable restrictions on the exercise of any of the rights conferred by the said sub-clauses either in the interests of the general public or for the protection of the interests of any Scheduled Tribe.\n\n(6) Nothing in sub-clause (g) of the said clause shall affect the operation of any existing law in so far as it imposes, or prevent the State from making any law imposing, in the interests of the general public, reasonable restrictions on the exercise of the right conferred by the said sub-clause, and, in particular, 2[nothing in the said sub-clause shall affect the operation of any existing law in so far as it relates to, or prevent the State from making any law relating to,—\n\n(i) the professional or technical qualifications necessary for practising any profession or carrying on any occupation, trade or business, or\n\n(ii) the carrying on by the State, or by a corporation owned or controlled by the State, of any trade, business, industry or service, whether to the exclusion, complete or partial, of citizens or otherwise].",
+          "metadata": {
+            "type": "text",
+            "page_number": 4,
+            "section_tag": "22dd7eea33",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1439,
+            "estimated_tokens": 359,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p5::c2347e6d8a::s10",
+          "content": "Protection in respect of conviction for offences.\n\n20. (1) No person shall be convicted of any offence except for violation of a law in force at the time of the commission of the Act charged as an offence, nor be subjected to a penalty greater than that which might have been inflicted under the law in force at the time of the commission of the offence. the same offence more than once.\n\n(3) No person accused of any offence shall be compelled\n\nto be a witness against himself.\n\nProtection of life and personal liberty.\n\n21. No person shall be deprived of his life or personal liberty except according to procedure established by law.\n\n1Subs. by the Constitution (Forty-fourth Amendment) Act, 1978, s. 2, for ”sub-clauses\n\n(d), (e) and (f)” (w.e.f. 20-6-1979).\n\n2Subs. by the Constitution (First Amendment) Act, 1951, s. 3, for certain words.\n\nTHE CONSTITUTION OF INDIA\n\n11",
+          "metadata": {
+            "type": "text",
+            "page_number": 5,
+            "section_tag": "c2347e6d8a",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 874,
+            "estimated_tokens": 218,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p6::ceb51c7548::s11",
+          "content": "(Part III.—Fundamental Rights.—Arts. 21A-22.)\n\n[21A. The State shall provide free and compulsory education to all children of the age of six to fourteen years in such manner as the State may, by law, determine.]\n\nRight to education.\n\n22. (1) No person who is arrested shall be detained in custody without being informed, as soon as may be, of the grounds for such arrest nor shall he be denied the right to consult, and to be defended by, a legal practitioner of his choice. (2) Every person who is arrested and detained in custody shall be produced before the nearest magistrate within a period of twenty-four hours of such arrest excluding the time necessary for the journey from the place of arrest to the court of the magistrate and no such person shall be detained in custody beyond the said period without the authority of a magistrate.",
+          "metadata": {
+            "type": "text",
+            "page_number": 6,
+            "section_tag": "ceb51c7548",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 842,
+            "estimated_tokens": 210,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p6::9d081365e0::s12",
+          "content": "Protection against arrest and detention in certain cases.\n\n(3) Nothing in clauses (1) and (2) shall apply—\n\n(a) to any person who for the time being is an enemy\n\nalien; or\n\n(b) to any person who is arrested or detained under\n\nany law providing for preventive detention. **(4) No law providing for preventive detention shall authorise the detention of a person for a longer period than three months unless—\n\n(a) an Advisory Board consisting of persons who are, or have been, or are qualified to be appointed\n\nIns by the Constitution (Eighty-sixth Amendment) Act, 2002, s. 2 (which is not yet in force, date\n\nto be notified later on).\n\n**Cl. (4) shall stand substituted by the Constitution (Forty-fourth Amendment) Act, 1978, s. 3\n\n(which is yet not in force, date to be notified later on) as—\n\n“(4) No law providing for preventive detention shall authorise the detention of a person for a longer period than two months unless an Advisory Board constituted in acordance with the recommendations of the Chief Justice of the appropriate Hight Court has reported before the expiration of the said period of two months that there is in its opinion sufficient cause for such detention:\n\nProvided that an Advisory Board shall consist of a Chairman and not less than two other members, and the Chairman shall be a serving Judge of the appropriate High Court and the other menbers shall be serving or retired Judges of any High Court:\n\nProvided further that nothing in this clause shall authorise the detention of any person beyond the maximum period prescribed by any law made by Parliament under sub-clause (a) of clause (7).",
+          "metadata": {
+            "type": "text",
+            "page_number": 6,
+            "section_tag": "9d081365e0",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1617,
+            "estimated_tokens": 404,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p6::9d081365e0::s13",
+          "content": "Explanation.—In this clause, “appropriate High Court” means,— (i) in the case of the detention of a person in pursuance of an order of detention made by the Government of India or an officer or authority subordinate to that Government, the High Court for the Union territory of Delhi;\n\n(ii) in the case of the detention of a person in pursuance of an order of detention made by the Government of any State (other than a Union territory), the High Court for the State; and",
+          "metadata": {
+            "type": "text",
+            "page_number": 6,
+            "section_tag": "9d081365e0",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 471,
+            "estimated_tokens": 117,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p6::ca8bf87694::s14",
+          "content": "(iii) in the case of the detention of a person in pursuance of an order of detention made by the administrator of a Union territory or an officer or authority subordinate to such administrator, such High Court as may be specified by or under any law made by Parliament in this behalf.”\n\n12\n\nTHE CONSTITUTION OF INDIA\n\n(Part III.—Fundamental Rights.—Art. 22.)\n\nas, Judges of a High Court has reported before the expiration of the said period of three months that there is in its opinion sufficient cause for such detention:\n\nProvided that nothing in this sub-clause shall authorise the detention of any person beyond the maximum period prescribed by any law made by Parliament under sub-clause (b) of clause (7); or\n\n(b) such person is detained in accordance with the provisions of any law made by Parliament under sub- clauses (a) and (b) of clause (7).\n\n(5) When any person is detained in pursuance of an order made under any law providing for preventive detention, the authority making the order shall, as soon as may be, communicate to such person the grounds on which the order has been made and shall afford him the earliest opportunity of making a representation against the order.\n\n(6) Nothing in clause (5) shall require the authority making any such order as is referred to in that clause to disclose facts which such authority considers to be against the public interest to disclose.",
+          "metadata": {
+            "type": "text",
+            "page_number": 6,
+            "section_tag": "ca8bf87694",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1393,
+            "estimated_tokens": 348,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p7::7e62a5f35e::s15",
+          "content": "(7) Parliament may by law prescribe—\n\n(a) the circumstances under which, and the class or classes of cases in which, a person may be detained for a period longer than three months under any law providing for preventive detention without obtaining the opinion of an Advisory Board in accordance with the provisions of sub-clause (a) of clause (4);\n\n**(b) the maximum period for which any person may in any class or classes of cases be detained under any law providing for preventive detention; and\n\n(c) the procedure to be followed by an Advisory Board in an inquiry under ***[sub-clause (a) of clause (4)].\n\nSub-clause (a) shall stand omitted by the Constitution (Forty-fourth Amendment) Act,\n\n1978, s. 3 (which is yet not in force, date to be notified later on).\n\n**Sub-clause (b) shall stand relettered as sub-clause (a) by s. 3, ibid. (which is yet not in\n\nforce, date to be notified later on).\n\n***The words, letter and figure in brackets shall stand substituted as “clause (4)” by\n\ns. 3, ibid. (which is yet not in force, date to be notified later on).\n\nTHE CONSTITUTION OF INDIA",
+          "metadata": {
+            "type": "text",
+            "page_number": 7,
+            "section_tag": "7e62a5f35e",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1084,
+            "estimated_tokens": 271,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p8::7a204e0f63::s16",
+          "content": "(Part III.—Fundamental Rights.—Arts. 23—26.)\n\nRight against Exploitation\n\n23. (1) Traffic in human beings and begar and other similar forms of forced labour are prohibited and any contravention of this provision shall be an offence punishable in accordance with law. (2) Nothing in this article shall prevent the State from imposing compulsory service for public purposes, and in imposing such service the State shall not make any discrimination on grounds only of religion, race, caste or class or any of them.\n\n24. No child below the age of fourteen years shall be employed to work in any factory or mine or engaged in any other hazardous employment. Right to Freedom of Religion\n\n25. (1) Subject to public order, morality and health and to the other provisions of this Part, all persons are equally entitled to freedom of conscience and the right freely to profess, practise and propagate religion. (2) Nothing in this article shall affect the operation of any existing law or prevent the State from making any law—\n\n(a) regulating or restricting any economic, financial, political or other secular activity which may be associated with religious practice;\n\n(b) providing for social welfare and reform or the throwing open of Hindu religious institutions of a public character to all classes and sections of Hindus. Explanation I.—The wearing and carrying of kirpans shall be deemed to be included in the profession of the Sikh religion.\n\nExplanation II.—In sub-clause (b) of clause (2), the reference to Hindus shall be construed as including a reference to persons professing the Sikh, Jaina or Buddhist religion, and the reference to Hindu religious institutions shall be construed accordingly.",
+          "metadata": {
+            "type": "text",
+            "page_number": 8,
+            "section_tag": "7a204e0f63",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1700,
+            "estimated_tokens": 425,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p8::7a204e0f63::s17",
+          "content": "26. Subject to public order, morality and health, every religious denomination or any section thereof shall have the right— (a) to establish and maintain institutions for",
+          "metadata": {
+            "type": "text",
+            "page_number": 8,
+            "section_tag": "7a204e0f63",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 170,
+            "estimated_tokens": 42,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p8::7b062c81f9::s18",
+          "content": "26. Subject to public order, morality and health, every religious denomination or any section thereof shall have the right— (a) to establish and maintain institutions for\n\nreligious and charitable purposes;\n\n(b) to manage its own affairs in matters of religion;\n\n13\n\nProhibition of traffic in human beings and forced labour.\n\nProhibition of employment of children in factories, etc.\n\nFreedom of conscience and free profession, practice and propagation of religion.\n\n14\n\nTHE CONSTITUTION OF INDIA\n\n(Part III.—Fundamental Rights.—Arts. 26—30.)\n\n(c) to own and acquire movable and immovable",
+          "metadata": {
+            "type": "text",
+            "page_number": 8,
+            "section_tag": "7b062c81f9",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 587,
+            "estimated_tokens": 146,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p9::43df1124e1::s19",
+          "content": "property; and\n\n(d) to administer such property in accordance with\n\nlaw.\n\nFreedom as to payment of taxes for promotion of any particular religion.\n\n27. No person shall be compelled to pay any taxes, the proceeds of which are specifically appropriated in payment of expenses for the promotion or maintenance of any particular religion or religious denomination.\n\nFreedom as to attendance at religious instruction or religious worship in certain educational institutions.\n\n28. (1) No religious instruction shall be provided in any educational institution wholly maintained out of State funds. (2) Nothing in clause (1) shall apply to an educational institution which is administered by the State but has been established under any endowment or trust which requires that religious instruction shall be imparted in such institution.\n\n(3) No person attending any educational institution recognised by the State or receiving aid out of State funds shall be required to take part in any religious instruction that may be imparted in such institution or to attend any religious worship that may be conducted in such institution or in any premises attached thereto unless such person or, if such person is a minor, his guardian has given his consent thereto.",
+          "metadata": {
+            "type": "text",
+            "page_number": 9,
+            "section_tag": "43df1124e1",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1248,
+            "estimated_tokens": 312,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p9::d0f5dc6c3c::s20",
+          "content": "Cultural and Educational Rights\n\nProtection of interests of minorities.\n\n29. (1) Any section of the citizens residing in the territory of India or any part thereof having a distinct language, script or culture of its own shall have the right to conserve the same. (2) No citizen shall be denied admission into any educational institution maintained by the State or receiving aid out of State funds on grounds only of religion, race, caste, language or any of them.\n\nRight of minorities to establish and administer educational institutions.\n\n30. (1) All minorities, whether based on religion or language, shall have the right to establish and administer educational institutions of their choice.\n\n1[(1A) In making any law providing for the compulsory acquisition of any property of an educational institution established and administered by a minority,\n\n1Ins. by the Constitution (Forty-fourth Amendment) Act, 1978, s. 4 (w.e.f. 20-6-1979).\n\nTHE CONSTITUTION OF INDIA",
+          "metadata": {
+            "type": "text",
+            "page_number": 9,
+            "section_tag": "d0f5dc6c3c",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 966,
+            "estimated_tokens": 241,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p10::2a87555813::s21",
+          "content": "(Part III.—Fundamental Rights.—Arts. 30—31A.)\n\nreferred to in clause (1), the State shall ensure that the amount fixed by or determined under such law for the acquisition of such property is such as would not restrict or abrogate the right guaranteed under that clause.]\n\n(2) The State shall not, in granting aid to educational institutions, discriminate against any educational institution on the ground that it is under the management of a minority, whether based on religion or language.\n\n1* * *\n\n31. [Compulsory acquisition of property.] Rep. by the Constitution (Forty-fourth Amendment) Act, 1978, s. 6 (w.e.f. 20-6-1979). 2[Saving of Certain Laws]\n\n3[31A. 4[(1) Notwithstanding anything contained in\n\narticle 13, no law providing for—\n\nSaving of laws providing for acquisition of estates, etc.\n\n(a) the acquisition by the State of any estate or of any rights therein or the extinguishment or modification of any such rights, or\n\n(b) the taking over of the management of any property by the State for a limited period either in the public interest or in order to secure the proper management of the property, or\n\n(c) the amalgamation of two or more corporations either in the public interest or in order to secure the proper management of any of the corporations, or\n\n(d) the extinguishment or modification of any rights of managing agents, secretaries and treasurers, managing directors, directors or managers of corporations, or of any voting rights of shareholders thereof, or\n\n1The sub-heading “Right to Property” omitted by the Constitution (Forty-fourth\n\nAmendment) Act, 1978, s. 5 (w.e.f. 20-6-1979).",
+          "metadata": {
+            "type": "text",
+            "page_number": 10,
+            "section_tag": "2a87555813",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1612,
+            "estimated_tokens": 403,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p10::2a87555813::s22",
+          "content": "Amendment) Act, 1978, s. 5 (w.e.f. 20-6-1979).\n\n2Ins. by the Constitution (Forty-second Amendment) Act, 1976, s. 3 (w.e.f. 3-1-1977). 3Ins. by the Constitution (First Amendment) Act, 1951, s. 4 (with retrospective effect). 4Subs. by the Constitution (Fourth Amendment) Act, 1955, s. 3, for cl. (1) (with",
+          "metadata": {
+            "type": "text",
+            "page_number": 10,
+            "section_tag": "2a87555813",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 303,
+            "estimated_tokens": 75,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p10::a0d8a69a10::s23",
+          "content": "retrospective effect).\n\n15\n\n16\n\nTHE CONSTITUTION OF INDIA\n\n(Part III.—Fundamental Rights.—Art. 31A.)\n\n(e) the extinguishment or modification of any rights accruing by virtue of any agreement, lease or licence for the purpose of searching for, or winning, any mineral or mineral oil, or the premature termination or cancellation of any such agreement, lease or licence,\n\nshall be deemed to be void on the ground that it is inconsistent with, or takes away or abridges any of the rights conferred by 1[article 14 or article 19]:\n\nProvided that where such law is a law made by the Legislature of a State, the provisions of this article shall not apply thereto unless such law, having been reserved for the consideration of the President, has received his assent:]\n\n2[Provided further that where any law makes any provision for the acquisition by the State of any estate and where any land comprised therein is held by a person under his personal cultivation, it shall not be lawful for the State to acquire any portion of such land as is within the ceiling limit applicable to him under any law for the time being in force or any building or structure standing thereon or appurtenant thereto, unless the law relating to the acquisition of such land, building or structure, provides for payment of compensation at a rate which shall not be less than the market value thereof.]",
+          "metadata": {
+            "type": "text",
+            "page_number": 10,
+            "section_tag": "a0d8a69a10",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1372,
+            "estimated_tokens": 343,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p11::60cf06ba2c::s24",
+          "content": "(2) In this article,—\n\n3[(a) the expression ''estate'' shall, in relation to any local area, have the same meaning as that expression or its local equivalent has in the existing law relating to land tenures in force in that area and shall also include—\n\n(i) any jagir, inam or muafi or other similar grant and in the States of 4[Tamil Nadu] and Kerala, any janmam right;\n\n1Subs. by the Constitution (Forty-fourth Amendment) Act, 1978, s. 7, for “article 14,\n\narticle 19 or article 31” (w.e.f. 20-6-1979).\n\n2Ins. by the Constitution (Seventeenth Amendment) Act, 1964, s. 2. 3Subs. by s. 2, ibid., for sub-clause (a) (with retrospective effect). 4Subs. by the Madras State (Alteration of Name) Act, 1968 (53 of 1968), s. 4, for\n\n“Madras”. (w.e..f. 14-1-1969).\n\nTHE CONSTITUTION OF INDIA",
+          "metadata": {
+            "type": "text",
+            "page_number": 11,
+            "section_tag": "60cf06ba2c",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 784,
+            "estimated_tokens": 196,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p12::7a78f1a381::s25",
+          "content": "(Part III.—Fundamental Rights.—Arts. 31A—31C.)\n\n(ii) any land held under ryotwari settlement;\n\n(iii) any land held or let for purposes of agriculture or for purposes ancillary thereto, including waste land, forest land, land for pasture or sites of buildings and other structures occupied by cultivators of land, agricultural labourers and village artisans;]\n\n(b) the expression ''rights'', in relation to an estate, shall include any rights vesting in a proprietor, sub- proprietor, under-proprietor, tenure-holder, 1[raiyat, under-raiyat] or other intermediary and any rights or privileges in respect of land revenue.]\n\n2[31B. Without prejudice to the generality of the provisions contained in article 31A, none of the Acts and Regulations specified in the Ninth Schedule nor any of the provisions thereof shall be deemed to be void, or ever to have become void, on the ground that such Act, Regulation or provision is inconsistent with, or takes away or abridges any of the rights conferred by, any provisions of this Part, and notwithstanding any judgment, decree or order of any court or Tribunal to the contrary, each of the said Acts and Regulations shall, subject to the power of any competent Legislature to repeal or amend it, continue in force.]",
+          "metadata": {
+            "type": "text",
+            "page_number": 12,
+            "section_tag": "7a78f1a381",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1256,
+            "estimated_tokens": 314,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p12::7990f4baee::s26",
+          "content": "Validation of certain Acts and Regulations.\n\n3[31C. Notwithstanding anything contained in article 13, no law giving effect to the policy of the State towards securing 4[all or any of the principles laid down in Part IV] shall be deemed to be void on the ground that it is inconsistent with, or takes away or abridges any of the rights conferred by 5[article 14 or article 19]; 6and no law\n\nSaving of laws giving effect to certain directive principles.\n\n1Ins. by the Constitution (Fourth Amendment) Act, 1955, s. 3 (with retrospective effect). 2Ins. by the Constitution (First Amendment) Act, 1951, s. 5. 3Ins. by the Constitution (Twenty-fifth Amendment) Act, 1971, s. 3 (w.e.f. 20-4-1972). 4Subs. by the Constitution (Forty-second Amendment) Act, 1976, s. 4, for “the principles specified in clause (b) or clause (c) of article 39” (w.e.f. 3-1-1977). Section 4 has been declared invalid by the Supreme Court in Minerva Mills Ltd. and others vs. Union of India and others (1980) 2. S.C.C. 591.\n\n5Subs. by the Constitution (Forty-fourth Amendment) Act, 1978, s. 8, for “article 14,\n\narticle 19 or article 31” (w.e.f. 20-6-1979).\n\n6In Kesavananda Bharati vs. The State of Kerala, (1973) Supp. S.C.R. 1, the Supreme Court\n\nheld the provisions in italics to be invalid.\n\n17\n\n18\n\nTHE CONSTITUTION OF INDIA",
+          "metadata": {
+            "type": "text",
+            "page_number": 12,
+            "section_tag": "7990f4baee",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1300,
+            "estimated_tokens": 325,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p13::03e6f3c7c6::s27",
+          "content": "(Part III.—Fundamental Rights.—Arts. 31C—32A.)\n\ncontaining a declaration that it is for giving effect to such policy shall be called in question in any court on the ground that it does not give effect to such policy:\n\nProvided that where such law is made by the Legislature of a State, the provisions of this article shall not apply thereto unless such law, having been reserved for the consideration of the President, has received his assent.\n\n131D. [Saving of laws in respect of anti-national activities.] Rep. by the Constitution (Forty-third Amendment) Act, 1977, s. 2 (w.e.f. 13-4-1978).",
+          "metadata": {
+            "type": "text",
+            "page_number": 13,
+            "section_tag": "03e6f3c7c6",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 592,
+            "estimated_tokens": 148,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p13::right-to-constitutional-remedies::s28",
+          "content": "Right to Constitutional Remedies\n\nRemedies for enforcement of rights conferred by this Part.\n\n32. (1) The right to move the Supreme Court by appropriate proceedings for the enforcement of the rights conferred by this Part is guaranteed.\n\n(2) The Supreme Court shall have power to issue directions or orders or writs, including writs in the nature of habeas corpus, mandamus, prohibition, quo warranto and certiorari, whichever may be appropriate, for the enforcement of any of the rights conferred by this Part.\n\n(3) Without prejudice to the powers conferred on the Supreme Court by clauses (1) and (2), Parliament may by law empower any other court to exercise within the local limits of its jurisdiction all or any of the powers exercisable by the Supreme Court under clause (2).\n\n(4) The right guaranteed by this article shall not be suspended except as otherwise provided for by this Constitution.\n\n232A. [Constitutional validity of State laws not to be considered in proceedings under article 32.] Rep. by the Constitution (Forty-third Amendment) Act, 1977, s. 3 (w.e.f. 13-4-1978).\n\n1Ins. by the Constitution (Forty-second Amendment) Act, 1976, s. 5 (w.e.f. 3-1-1977). 2Ins. by s. 6, ibid. (w.e.f. 1-2-1977).\n\nTHE CONSTITUTION OF INDIA\n\n19",
+          "metadata": {
+            "type": "text",
+            "page_number": 13,
+            "section_tag": "right-to-constitutional-remedies",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1245,
+            "estimated_tokens": 311,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p14::c11cb32c7d::s29",
+          "content": "(Part III.—Fundamental Rights.—Arts. 33—35.)\n\n1[33. Parliament may, by law, determine to what extent any of the rights conferred by this Part shall, in their application to,—\n\n(a) the members of the Armed Forces; or\n\nPower of Parliament to modify the rights conferred by this Part in their application to Forces, etc.\n\n(b) the members of the Forces charged with the\n\nmaintenance of public order; or\n\n(c) persons employed in any bureau or other organisation established by the State for purposes of intelligence or counter intelligence; or\n\n(d) person employed in, or in connection with, the telecommunication systems set up for the purposes of any Force, bureau or organisation referred to in clauses (a) to (c),\n\nbe restricted or abrogated so as to ensure the proper discharge of their duties and the maintenance of discipline among them.]\n\n34. Notwithstanding anything in the foregoing provisions of this Part, Parliament may by law indemnify any person in the service of the Union or of a State or any other person in respect of any act done by him in connection with the maintenance or restoration of order in any area within the territory of India where martial law was in force or validate any sentence passed, punishment inflicted, forfeiture ordered or other act done under martial law in such area.\n\nRestriction on rights conferred by this Part while martial law is in force in any area.\n\n35. Notwithstanding anything in this Constitution,—\n\n(a) Parliament shall have, and the Legislature of\n\na State shall not have, power to make laws—\n\nLegislation to give effect to the provisions of this Part.\n\n(i) with respect to any of the matters which under clause (3) of article 16, clause (3) of article 32, article 33 and article 34 may be provided for by law made by Parliament; and",
+          "metadata": {
+            "type": "text",
+            "page_number": 14,
+            "section_tag": "c11cb32c7d",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 1786,
+            "estimated_tokens": 446,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p14::c11cb32c7d::s30",
+          "content": "(ii) for prescribing punishment for those acts\n\nwhich are declared to be offences under this Part;\n\n1Subs. by the Constitution (Fiftieth Amendment) Act, 1984, s. 2, for art. 33.\n\n20\n\nTHE CONSTITUTION OF INDIA",
+          "metadata": {
+            "type": "text",
+            "page_number": 14,
+            "section_tag": "c11cb32c7d",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 208,
+            "estimated_tokens": 52,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p15::b80a1cbc95::s31",
+          "content": "(Part III.—Fundamental Rights.—Art. 35.)\n\nand Parliament shall, as soon as may be after the commencement of this Constitution, make laws for prescribing punishment for the acts referred to in sub-clause (ii);\n\n(b) any law in force immediately before the commencement of this Constitution in the territory of India with respect to any of the matters referred to in sub-clause (i) of clause (a) or providing for punishment for any act referred to in sub-clause (ii) of that clause shall, subject to the terms thereof and to any adaptations and modifications that may be made therein under article 372, continue in force until altered or repealed or amended by Parliament.",
+          "metadata": {
+            "type": "text",
+            "page_number": 15,
+            "section_tag": "b80a1cbc95",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 669,
+            "estimated_tokens": 167,
+            "language": "en"
+          }
+        },
+        {
+          "parent_id": "6f379f722a28af72086c78778c7c8c2d::p15::5806962a96::s32",
+          "content": "Explanation.—In this article, the expression “law in\n\nforce” has the same meaning as in article 372.",
+          "metadata": {
+            "type": "text",
+            "page_number": 15,
+            "section_tag": "5806962a96",
+            "source_file": "fundamental rights.pdf",
+            "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+            "char_count": 100,
+            "estimated_tokens": 25,
+            "language": "en"
+          }
+        }
+      ],
+      "tables": [],
+      "images": [],
+      "citations": [
+        {
+          "type": "articles",
+          "text": "article 368",
+          "groups": [
+            "368"
+          ],
+          "start": 621,
+          "end": 632,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "177efcf986"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1971",
+          "groups": [
+            null,
+            "1971"
+          ],
+          "start": 228,
+          "end": 237,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "right-to-equality"
+        },
+        {
+          "type": "articles",
+          "text": "article 29",
+          "groups": [
+            "29"
+          ],
+          "start": 371,
+          "end": 381,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "1e8dd52769"
+        },
+        {
+          "type": "articles",
+          "text": "article 19",
+          "groups": [
+            "19"
+          ],
+          "start": 647,
+          "end": 657,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "1e8dd52769"
+        },
+        {
+          "type": "articles",
+          "text": "article 30",
+          "groups": [
+            "30"
+          ],
+          "start": 1112,
+          "end": 1122,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "1e8dd52769"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1951",
+          "groups": [
+            null,
+            "1951"
+          ],
+          "start": 264,
+          "end": 273,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "0acae7b2c6"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 2005",
+          "groups": [
+            null,
+            "2005"
+          ],
+          "start": 332,
+          "end": 341,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "0acae7b2c6"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1956",
+          "groups": [
+            null,
+            "1956"
+          ],
+          "start": 470,
+          "end": 479,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2e2cd4aed3"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1995",
+          "groups": [
+            null,
+            "1995"
+          ],
+          "start": 711,
+          "end": 720,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2e2cd4aed3"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 2001",
+          "groups": [
+            null,
+            "2001"
+          ],
+          "start": 780,
+          "end": 789,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2e2cd4aed3"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 2000",
+          "groups": [
+            null,
+            "2000"
+          ],
+          "start": 888,
+          "end": 897,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2e2cd4aed3"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 2006,
+          "end": 2015,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "69d37a9fd9"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1951",
+          "groups": [
+            null,
+            "1951"
+          ],
+          "start": 2146,
+          "end": 2155,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "69d37a9fd9"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1963",
+          "groups": [
+            null,
+            "1963"
+          ],
+          "start": 2254,
+          "end": 2263,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "69d37a9fd9"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 689,
+          "end": 698,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "c2347e6d8a"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1951",
+          "groups": [
+            null,
+            "1951"
+          ],
+          "start": 808,
+          "end": 817,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "c2347e6d8a"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 2002",
+          "groups": [
+            null,
+            "2002"
+          ],
+          "start": 557,
+          "end": 566,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "9d081365e0"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 713,
+          "end": 722,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "9d081365e0"
+        },
+        {
+          "type": "acts",
+          "text": "Act,\n\n1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 688,
+          "end": 698,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7e62a5f35e"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 904,
+          "end": 913,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "d0f5dc6c3c"
+        },
+        {
+          "type": "articles",
+          "text": "article 13",
+          "groups": [
+            "13"
+          ],
+          "start": 707,
+          "end": 717,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2a87555813"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 592,
+          "end": 601,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2a87555813"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 1577,
+          "end": 1586,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2a87555813"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1976",
+          "groups": [
+            null,
+            "1976"
+          ],
+          "start": 1665,
+          "end": 1674,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2a87555813"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1951",
+          "groups": [
+            null,
+            "1951"
+          ],
+          "start": 1744,
+          "end": 1753,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2a87555813"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1955",
+          "groups": [
+            null,
+            "1955"
+          ],
+          "start": 1835,
+          "end": 1844,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "2a87555813"
+        },
+        {
+          "type": "articles",
+          "text": "article 14",
+          "groups": [
+            "14"
+          ],
+          "start": 500,
+          "end": 510,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "a0d8a69a10"
+        },
+        {
+          "type": "articles",
+          "text": "article 19",
+          "groups": [
+            "19"
+          ],
+          "start": 514,
+          "end": 524,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "a0d8a69a10"
+        },
+        {
+          "type": "articles",
+          "text": "article 14",
+          "groups": [
+            "14"
+          ],
+          "start": 446,
+          "end": 456,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "60cf06ba2c"
+        },
+        {
+          "type": "articles",
+          "text": "article 19",
+          "groups": [
+            "19"
+          ],
+          "start": 459,
+          "end": 469,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "60cf06ba2c"
+        },
+        {
+          "type": "articles",
+          "text": "article 31",
+          "groups": [
+            "31"
+          ],
+          "start": 473,
+          "end": 483,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "60cf06ba2c"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 424,
+          "end": 433,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "60cf06ba2c"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1964",
+          "groups": [
+            null,
+            "1964"
+          ],
+          "start": 556,
+          "end": 565,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "60cf06ba2c"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1968",
+          "groups": [
+            null,
+            "1968"
+          ],
+          "start": 692,
+          "end": 701,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "60cf06ba2c"
+        },
+        {
+          "type": "articles",
+          "text": "article 31A",
+          "groups": [
+            "31A"
+          ],
+          "start": 696,
+          "end": 707,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7a78f1a381"
+        },
+        {
+          "type": "sections",
+          "text": "Section 4",
+          "groups": [
+            "4"
+          ],
+          "start": 852,
+          "end": 861,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "articles",
+          "text": "article 13",
+          "groups": [
+            "13"
+          ],
+          "start": 90,
+          "end": 100,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "articles",
+          "text": "article 14",
+          "groups": [
+            "14"
+          ],
+          "start": 350,
+          "end": 360,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "articles",
+          "text": "article 19",
+          "groups": [
+            "19"
+          ],
+          "start": 364,
+          "end": 374,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "articles",
+          "text": "article 39",
+          "groups": [
+            "39"
+          ],
+          "start": 821,
+          "end": 831,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "articles",
+          "text": "article 14",
+          "groups": [
+            "14"
+          ],
+          "start": 1069,
+          "end": 1079,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "articles",
+          "text": "article 19",
+          "groups": [
+            "19"
+          ],
+          "start": 1082,
+          "end": 1092,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "articles",
+          "text": "article 31",
+          "groups": [
+            "31"
+          ],
+          "start": 1096,
+          "end": 1106,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1955",
+          "groups": [
+            null,
+            "1955"
+          ],
+          "start": 498,
+          "end": 507,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1951",
+          "groups": [
+            null,
+            "1951"
+          ],
+          "start": 587,
+          "end": 596,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1971",
+          "groups": [
+            null,
+            "1971"
+          ],
+          "start": 655,
+          "end": 664,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1976",
+          "groups": [
+            null,
+            "1976"
+          ],
+          "start": 743,
+          "end": 752,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1978",
+          "groups": [
+            null,
+            "1978"
+          ],
+          "start": 1047,
+          "end": 1056,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "7990f4baee"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1977",
+          "groups": [
+            null,
+            "1977"
+          ],
+          "start": 557,
+          "end": 566,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "03e6f3c7c6"
+        },
+        {
+          "type": "articles",
+          "text": "article 32",
+          "groups": [
+            "32"
+          ],
+          "start": 990,
+          "end": 1000,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "right-to-constitutional-remedies"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1977",
+          "groups": [
+            null,
+            "1977"
+          ],
+          "start": 1052,
+          "end": 1061,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "right-to-constitutional-remedies"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1976",
+          "groups": [
+            null,
+            "1976"
+          ],
+          "start": 1140,
+          "end": 1149,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "right-to-constitutional-remedies"
+        },
+        {
+          "type": "articles",
+          "text": "article 16",
+          "groups": [
+            "16"
+          ],
+          "start": 1672,
+          "end": 1682,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "c11cb32c7d"
+        },
+        {
+          "type": "articles",
+          "text": "article 32",
+          "groups": [
+            "32"
+          ],
+          "start": 1698,
+          "end": 1708,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "c11cb32c7d"
+        },
+        {
+          "type": "articles",
+          "text": "article 33",
+          "groups": [
+            "33"
+          ],
+          "start": 1710,
+          "end": 1720,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "c11cb32c7d"
+        },
+        {
+          "type": "articles",
+          "text": "article 34",
+          "groups": [
+            "34"
+          ],
+          "start": 1725,
+          "end": 1735,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "c11cb32c7d"
+        },
+        {
+          "type": "acts",
+          "text": "Act, 1984",
+          "groups": [
+            null,
+            "1984"
+          ],
+          "start": 1936,
+          "end": 1945,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "c11cb32c7d"
+        },
+        {
+          "type": "articles",
+          "text": "article 372",
+          "groups": [
+            "372"
+          ],
+          "start": 587,
+          "end": 598,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "b80a1cbc95"
+        },
+        {
+          "type": "articles",
+          "text": "article 372",
+          "groups": [
+            "372"
+          ],
+          "start": 88,
+          "end": 99,
+          "confidence": 0.9,
+          "source_file": "fundamental rights.pdf",
+          "file_hash": "6f379f722a28af72086c78778c7c8c2d",
+          "parent_section": "5806962a96"
+        }
+      ]
+    },
+    "performance_metrics": {
+      "total_time": 0,
+      "avg_file_time": 0,
+      "throughput": 0
+    }
+  },
+  "storage_results": {
+    "texts": {
+      "stored": 0,
+      "errors": 33
+    },
+    "citations": {
+      "stored": 59,
+      "errors": 0
+    }
+  },
+  "performance_metrics": {
+    "api_calls": {
+      "gemini_embedding": 0,
+      "gemini_generation": 32,
+      "groq_generation": 32,
+      "total_tokens": 0
+    },
+    "processing_times": {
+      "document_parsing": [
+        1.200531244277954
+      ],
+      "embedding_generation": [],
+      "vector_search": [],
+      "response_generation": []
+    },
+    "error_tracking": {
+      "api_errors": 0,
+      "processing_errors": 0,
+      "retrieval_errors": 0
+    }
+  },
+  "timestamp": "2025-09-09T12:19:19.678472",
+  "version": "3.1_ultimate"
+}

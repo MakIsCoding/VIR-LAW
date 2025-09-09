@@ -1,7 +1,7 @@
-// src/components/MainLayout.jsx
+// FIXED MainLayout.jsx - Complete implementation
 import React from "react";
 import Header from "./Header";
-import Sidebar from "./Sidebar";
+import UltimateSidebar from "./UltimateSidebar";
 
 const MainLayout = ({
   user,
@@ -11,7 +11,7 @@ const MainLayout = ({
   recentQueries,
   onRecentQueryClick,
   loadingRecentQueries,
-  activeQueryIdFromUrl, // <--- NEW PROP: Receive from App.jsx
+  activeQueryIdFromUrl,
   children,
 }) => {
   const toggleSidebar = () => {
@@ -19,39 +19,29 @@ const MainLayout = ({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-800">
-      {/* Sidebar Component (handles its own responsive positioning internally) */}
-      <Sidebar
+    <div className="flex h-screen bg-gray-50">
+      {/* Enhanced Sidebar */}
+      <UltimateSidebar
+        user={user}
         isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={toggleSidebar}
+        setIsSidebarOpen={setIsSidebarOpen}
         onNewQueryClick={onNewQueryClick}
         recentQueries={recentQueries}
         onRecentQueryClick={onRecentQueryClick}
-        user={user}
-        activeQueryIdFromUrl={activeQueryIdFromUrl} // <--- Pass it down to Sidebar
+        loadingRecentQueries={loadingRecentQueries}
+        activeQueryIdFromUrl={activeQueryIdFromUrl}
       />
 
-      {/* Main Content Area Container (Header + Main Content) */}
-      <div
-        className={`flex flex-col flex-1 min-w-0 h-full
-          transition-all duration-300 ease-in-out`}
-      >
-        {/* Header - Stays at the top of the main content area */}
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
         <Header onToggleSidebar={toggleSidebar} user={user} />
-
-        {/* Main Content Area - Takes up remaining vertical space */}
-        <main className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        
+        {/* Main Content */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
           {children}
         </main>
       </div>
-
-      {/* Overlay for small screens when sidebar is open */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={toggleSidebar} // Click outside to close sidebar on mobile
-        ></div>
-      )}
     </div>
   );
 };

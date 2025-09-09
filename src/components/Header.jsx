@@ -1,4 +1,4 @@
-// src/components/Header.jsx
+// FIXED Header.jsx - Complete implementation preserving your design intent
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
@@ -8,36 +8,40 @@ const Header = ({ onToggleSidebar, user }) => {
   const navigate = useNavigate();
 
   return (
-    // Header should be fixed to the top, spanning full width
-    <header className="flex-shrink-0 bg-gray-900 text-white p-4 flex items-center justify-between shadow-md z-20 w-full">
-      <div className="flex items-center">
-        {/* Sidebar Toggle Button */}
+    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      {/* Left side - Mobile menu button */}
+      <div className="flex items-center space-x-4">
         <button
           onClick={onToggleSidebar}
-          className="p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-4"
-          aria-label="Toggle Sidebar"
+          className="lg:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
         >
-          <Bars3Icon className="w-6 h-6" />
+          <Bars3Icon className="h-6 w-6" />
         </button>
-        {/* Main application title */}
-        <span className="text-xl font-semibold">VirLaw Assistant</span>
+        
+        <div className="hidden lg:block">
+          <h1 className="text-xl font-semibold text-gray-900">VirLaw AI</h1>
+          <p className="text-xs text-gray-500">Ultimate Legal Assistant</p>
+        </div>
       </div>
-      <div className="flex items-center">
+
+      {/* Right side - User info */}
+      <div className="flex items-center space-x-4">
         {user ? (
-          <>
-            {/* Removed "Welcome, Vir Law" text from here */}
-            <button
-              onClick={() => navigate("/dashboard/profile")}
-              className="p-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="User Profile"
-            >
-              <UserCircleIcon className="w-6 h-6" />
-            </button>
-          </>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <UserCircleIcon className="h-8 w-8 text-gray-400" />
+              <div className="hidden md:block">
+                <p className="text-sm font-medium text-gray-700">
+                  {user.displayName || user.email}
+                </p>
+                <p className="text-xs text-gray-500">Online</p>
+              </div>
+            </div>
+          </div>
         ) : (
           <button
             onClick={() => navigate("/signin")}
-            className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm"
+            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100"
           >
             Sign In
           </button>

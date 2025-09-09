@@ -19,11 +19,11 @@ const WelcomePage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-gray-100 p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-100 p-6">
       <div className="max-w-3xl text-center">
         {" "}
         {/* This div ensures its content is centered */}
-        <h1 className="text-4xl font-bold text-blue-300 mb-6">
+        <h1 className="text-4xl font-bold text-black mb-4">
           Welcome to VirLaw!
         </h1>
         <p className="text-lg text-gray-300 mb-8 leading-relaxed">
