@@ -1,15 +1,6 @@
 # 🏛️ Virtual Legal Assistant - Multi-RAG System for Indian Law
 
-A state-of-the-art Retrieval-Augmented Generation (RAG) system specialized for Indian legal documents, built with the best **free AI models available in 2025**.
-
-## 🚀 Key Features
-
-### ✨ **2025's Best Free AI Stack**
-- **Google Gemini 2.0 Flash** - Advanced text generation (FREE: 15 RPM, 1M TPM, 200 RPD)
-- **Google Gemini Embedding-001** - State-of-the-art embeddings (FREE: 100 RPM, 30K TPM, 1K RPD)  
-- **Groq Llama 3.3 70B** - Ultra-fast inference (FREE with generous limits)
-- **ChromaDB** - Advanced vector database with metadata filtering
-- **HuggingFace Transformers** - Backup embedding models (always free)
+A state-of-the-art Retrieval-Augmented Generation (RAG) system specialized for Indian legal documents
 
 ### 🧠 **Multi-Modal RAG Architecture**
 - **Text RAG**: Constitutional provisions, legal precedents, statutes
@@ -61,21 +52,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. **Get FREE API Keys (2 minutes)**
-
-#### **Google Gemini API (Primary)**
-1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Sign in with Google account  
-3. Click "Create API key"
-4. Copy your API key
-
-#### **Groq API (Secondary)**  
-1. Go to [Groq Console](https://console.groq.com/keys)
-2. Sign up/sign in
-3. Create new API key
-4. Copy your API key
-
-### 3. **Configure Environment**
+### 2. **Configure Environment**
 ```bash
 # Copy sample environment file
 cp sample.env .env
@@ -85,7 +62,7 @@ cp sample.env .env
 # GROQ_API_KEY=your_groq_api_key_here
 ```
 
-### 4. **Add Legal Documents**
+### 3. **Add Legal Documents**
 ```bash
 # Create documents directory
 mkdir legal_documents
@@ -98,7 +75,7 @@ mkdir legal_documents
 # - Any other legal documents
 ```
 
-### 5. **Run the Assistant**
+### 4. **Run the Assistant**
 ```bash
 python virtual-legal-assistant.py
 ```
@@ -159,7 +136,7 @@ print(f"Sources: {result['sources']}")
     └── Image Extraction & Recognition
     ↓
 💡 Intelligent Summarization
-    ├── Gemini 2.0 Flash (Text/Tables)
+    ├── Groq / Gemini 2.0 Flash (Text/Tables)
     └── Legal Context Analysis
     ↓
 🗄️ Vector Storage (ChromaDB)
@@ -196,7 +173,7 @@ print(f"Sources: {result['sources']}")
 | **ChromaDB** | Local storage | Unlimited | Vector database |
 
 ### **Smart Usage Patterns**
-- ✅ **Primary**: Gemini for embeddings + Groq for generation
+- ✅ **Primary**: Groq for embeddings + Groq for generation
 - ✅ **Fallback**: HuggingFace embeddings + Gemini generation  
 - ✅ **Rate limiting**: Built-in retry logic and graceful degradation
 - ✅ **Caching**: ChromaDB for persistent storage
@@ -336,20 +313,3 @@ We welcome contributions! Areas for improvement:
 This Virtual Legal Assistant provides **legal information** based on processed documents and should **NOT** be considered as legal advice. Always consult with qualified legal professionals for specific legal matters.
 
 ---
-
-## 📞 **Support**
-
-- 🐛 **Bug reports**: Create an issue
-- 💡 **Feature requests**: Create an issue  
-- 📖 **Documentation**: Check README and code comments
-- 💬 **Questions**: Start a discussion
-
----
-
-## 📄 **License**
-
-MIT License - feel free to use, modify, and distribute.
-
----
-
-**Built with ❤️ for the Indian legal community using the best free AI models of 2025.**
