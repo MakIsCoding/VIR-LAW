@@ -1,0 +1,153 @@
+{
+  "documents_processed": true,
+  "processing_stats": {
+    "total_documents": 1,
+    "total_chunks": 29,
+    "total_tables": 0,
+    "total_images": 0,
+    "total_citations": 85,
+    "processing_time": 0,
+    "last_processed": "2025-09-26T20:10:33.450728",
+    "document_index": {
+      "fundamental rights pdf.pdf": {
+        "hash": "6f379f722a28af72086c78778c7c8c2d",
+        "last_modified": 1757266199.8631048,
+        "document_type": "constitutional",
+        "legal_metrics": {
+          "document_type": "constitutional",
+          "total_articles": 25,
+          "constitutional_parts": [
+            "III",
+            "III",
+            "III",
+            "III",
+            "III",
+            "III",
+            "III",
+            "III",
+            "III",
+            "in",
+            "III",
+            "III",
+            "III",
+            "IV",
+            "III",
+            "is",
+            "III",
+            "in",
+            "III"
+          ],
+          "amendments_referenced": 0,
+          "total_citations": 85,
+          "text_chunks": 29,
+          "tables_found": 0,
+          "images_extracted": 0,
+          "is_constitutional": true
+        }
+      }
+    },
+    "error_count": 0,
+    "failed_documents": 0,
+    "processing_time_seconds": 271.142265,
+    "throughput_docs_per_minute": 0.2212860470129952,
+    "success_rate": 100.0,
+    "storage_results": {
+      "texts": {
+        "stored": 66,
+        "errors": 0,
+        "legal_analysis": {
+          "constitutional_content": 20,
+          "statutory_provisions": 1,
+          "case_law_references": 0,
+          "legal_citations": 0,
+          "fundamental_rights_content": 0,
+          "directive_principles_content": 0,
+          "constitutional_amendments": 0
+        },
+        "processing_metrics": {
+          "total_vectors_created": 58,
+          "constitutional_vectors": 8,
+          "cross_reference_vectors": 8,
+          "deduplication_hits": 0
+        },
+        "processing_time_ms": 18299.209594726562
+      },
+      "citations": {
+        "stored": 85,
+        "errors": 0,
+        "legal_analysis": {
+          "constitutional_content": 0,
+          "statutory_provisions": 0,
+          "case_law_references": 0,
+          "legal_citations": 0,
+          "fundamental_rights_content": 0,
+          "directive_principles_content": 0,
+          "constitutional_amendments": 0
+        },
+        "processing_metrics": {
+          "total_vectors_created": 85,
+          "constitutional_vectors": 0,
+          "cross_reference_vectors": 0,
+          "deduplication_hits": 0
+        },
+        "processing_time_ms": 804.189920425415
+      }
+    },
+    "documents_list": [
+      "fundamental rights pdf.pdf"
+    ],
+    "legal_analysis": {
+      "constitutional_documents": 1,
+      "statutory_documents": 0,
+      "case_law_documents": 0,
+      "total_articles_processed": 25,
+      "total_legal_citations": 85,
+      "constitutional_parts_identified": [
+        "IV",
+        "in",
+        "is",
+        "III"
+      ],
+      "constitutional_amendments_found": 0
+    },
+    "constitutional_completeness": {
+      "parts_coverage": 18.181818181818183,
+      "missing_parts": [
+        "VII",
+        "V",
+        "XX",
+        "VIII",
+        "XVIII",
+        "XIX",
+        "X",
+        "XVII",
+        "XI",
+        "XII",
+        "II",
+        "VI",
+        "XIII",
+        "IX",
+        "XXI",
+        "I",
+        "XV",
+        "XIV",
+        "XVI",
+        "XXII"
+      ],
+      "found_parts": [
+        "IV",
+        "in",
+        "is",
+        "III"
+      ],
+      "constitutional_documents_processed": 1,
+      "total_articles_found": 25
+    },
+    "legal_document_distribution": {
+      "constitutional": 100.0,
+      "statutory": 0.0,
+      "case_law": 0.0
+    }
+  },
+  "timestamp": "2025-09-26T20:10:33.456733"
+}

@@ -1,4 +1,4 @@
-// FIXED DocumentManagementPage.jsx - All advanced features preserved with fixes
+// ENHANCED DocumentManagementPage.jsx - Constitutional intelligence for processing only
 import React, { useState, useEffect, useCallback } from "react";
 import { auth } from "../firebase";
 import axios from "axios";
@@ -7,7 +7,8 @@ import {
   CheckCircleIcon, ExclamationTriangleIcon, ClockIcon,
   ChartBarIcon, CogIcon, ArrowPathIcon, InformationCircleIcon,
   DocumentTextIcon, TableCellsIcon, PhotoIcon, ScaleIcon,
-  FolderOpenIcon, CloudArrowUpIcon, ServerIcon
+  FolderOpenIcon, CloudArrowUpIcon, ServerIcon, 
+  BookOpenIcon, AcademicCapIcon, ShieldCheckIcon
 } from "@heroicons/react/24/solid";
 
 const DocumentManagementPage = () => {
@@ -45,7 +46,7 @@ const DocumentManagementPage = () => {
     return () => clearInterval(interval);
   }, [isProcessing]);
 
-  // Load document list
+  // Enhanced: Load document list with constitutional analysis
   const loadDocuments = async () => {
     try {
       setIsLoading(true);
@@ -59,7 +60,7 @@ const DocumentManagementPage = () => {
     }
   };
 
-  // Load system health
+  // Enhanced: Load system health with constitutional readiness
   const loadSystemHealth = async () => {
     try {
       const response = await axios.get("http://localhost:8000/health");
@@ -69,7 +70,7 @@ const DocumentManagementPage = () => {
     }
   };
 
-  // Load processing statistics
+  // Enhanced: Load processing statistics with legal intelligence
   const loadProcessingStats = async () => {
     try {
       const response = await axios.get("http://localhost:8000/system-stats");
@@ -79,7 +80,7 @@ const DocumentManagementPage = () => {
     }
   };
 
-  // Handle file selection
+  // Your existing file handling functions preserved
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files);
     setSelectedFiles(files);
@@ -87,7 +88,6 @@ const DocumentManagementPage = () => {
     setUploadSuccess(null);
   };
 
-  // Handle drag and drop
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -115,7 +115,7 @@ const DocumentManagementPage = () => {
     setUploadSuccess(null);
   }, []);
 
-  // Upload files
+  // Enhanced: Upload files with constitutional document detection
   const uploadFiles = async () => {
     if (selectedFiles.length === 0) return;
 
@@ -151,7 +151,7 @@ const DocumentManagementPage = () => {
         }
       });
 
-      const { uploaded, failed } = response.data;
+      const { uploaded, failed, constitutional_documents, upload_summary } = response.data;
 
       // Update progress status
       uploaded.forEach(file => {
@@ -168,7 +168,15 @@ const DocumentManagementPage = () => {
         }));
       });
 
-      setUploadSuccess(`Successfully uploaded ${uploaded.length} file(s).`);
+      // Enhanced: Constitutional document success message
+      if (constitutional_documents && constitutional_documents.length > 0) {
+        setUploadSuccess(
+          `Successfully uploaded ${uploaded.length} file(s) including ${constitutional_documents.length} constitutional document(s): ${constitutional_documents.join(', ')}`
+        );
+      } else {
+        setUploadSuccess(`Successfully uploaded ${uploaded.length} file(s).`);
+      }
+      
       if (failed.length > 0) {
         setUploadError(`Failed to upload ${failed.length} file(s).`);
       }
@@ -196,26 +204,39 @@ const DocumentManagementPage = () => {
     }
   };
 
-  // Process documents
+  // Enhanced: Process documents with constitutional intelligence
   const processDocuments = async () => {
     try {
       setIsProcessing(true);
       setUploadError(null);
       setUploadSuccess(null);
 
-      // FIXED: Use correct endpoint
-      const response = await axios.post("http://localhost:8000/process-documents", {
+      // Enhanced: Use ultimate processing endpoint with constitutional intelligence
+      const response = await axios.post("http://localhost:8000/process-documents-ultimate", {
         documents_dir: "./legal_documents",
         batch_size: batchSize
       });
 
       if (response.data.status === "success" || response.data.success) {
-        setUploadSuccess("Documents processed successfully!");
-        setProcessingStats(response.data.statistics || response.data.detailed_results);
+        const stats = response.data.statistics || response.data.detailed_results;
+        
+        // Enhanced: Constitutional processing success message
+        const constitutionalDocs = stats?.legal_analysis?.constitutional_documents || 0;
+        const totalArticles = stats?.legal_analysis?.total_articles_processed || 0;
+        
+        if (constitutionalDocs > 0) {
+          setUploadSuccess(
+            `Documents processed successfully! Processed ${constitutionalDocs} constitutional document(s) with ${totalArticles} articles. System ready for constitutional law queries.`
+          );
+        } else {
+          setUploadSuccess("Documents processed successfully!");
+        }
+        
+        setProcessingStats(stats);
         await loadDocuments();
         await loadSystemHealth();
       } else {
-        setUploadError(`Processing failed: ${response.data.message}`);
+        setUploadError(`Processing failed: ${response.data.message || 'Unknown error'}`);
       }
 
     } catch (error) {
@@ -226,7 +247,7 @@ const DocumentManagementPage = () => {
     }
   };
 
-  // Delete document
+  // Your existing delete function preserved
   const deleteDocument = async (filename) => {
     if (!confirm(`Are you sure you want to delete ${filename}?`)) return;
 
@@ -240,10 +261,15 @@ const DocumentManagementPage = () => {
     }
   };
 
-  // Get file icon based on type
-  const getFileIcon = (filename) => {
+  // Enhanced: Get file icon with constitutional document detection
+  const getFileIcon = (filename, isConstitutional = false) => {
     const ext = filename.toLowerCase().split('.').pop();
     const iconClass = "h-8 w-8";
+
+    // Enhanced: Special icon for constitutional documents
+    if (isConstitutional || filename.toLowerCase().includes('constitution')) {
+      return <BookOpenIcon className={`${iconClass} text-amber-600`} />;
+    }
 
     switch (ext) {
       case 'pdf':
@@ -266,13 +292,27 @@ const DocumentManagementPage = () => {
     }
   };
 
-  // Format file size
+  // Your existing formatFileSize function preserved
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Enhanced: Determine document type for display
+  const getDocumentType = (doc) => {
+    const filename = typeof doc === 'string' ? doc : doc.filename;
+    const isConstitutional = filename.toLowerCase().includes('constitution') || 
+                           filename.toLowerCase().includes('fundamental') ||
+                           filename.toLowerCase().includes('rights');
+    
+    if (isConstitutional) return { type: 'Constitutional Document', priority: 'high', color: 'text-amber-600' };
+    if (filename.toLowerCase().includes('case') || filename.toLowerCase().includes('judgment')) {
+      return { type: 'Case Law Document', priority: 'medium', color: 'text-blue-600' };
+    }
+    return { type: 'Legal Document', priority: 'normal', color: 'text-gray-500' };
   };
 
   if (!currentUser) {
@@ -289,46 +329,57 @@ const DocumentManagementPage = () => {
 
   return (
     <div className="flex-1 p-6 bg-gray-50">
-      {/* Header */}
+      {/* Enhanced Header with Constitutional Intelligence */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <DocumentPlusIcon className="h-8 w-8 text-blue-600" />
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Document Management</h1>
-              <p className="text-gray-600">Upload and process legal documents for AI analysis</p>
+              <p className="text-gray-600">Upload and process legal documents for constitutional AI analysis</p>
             </div>
           </div>
           
-          {/* System Status Indicator */}
+          {/* Enhanced System Status with Constitutional Readiness */}
           {systemHealth && (
-            <div className="flex items-center space-x-2 text-sm">
-              {systemHealth.status === "healthy" ? (
-                <CheckCircleIcon className="h-5 w-5 text-green-500" />
-              ) : (
-                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+            <div className="flex items-center space-x-4">
+              {/* Constitutional Readiness Indicator */}
+              {systemHealth.legal_system_readiness?.constitution_processed && (
+                <div className="flex items-center space-x-2 text-sm">
+                  <ShieldCheckIcon className="h-5 w-5 text-amber-500" />
+                  <span className="text-amber-600">Constitutional Ready</span>
+                </div>
               )}
-              <span className={systemHealth.status === "healthy" ? "text-green-600" : "text-red-600"}>
-                {systemHealth.status === "healthy" ? "Backend Online" : "Backend Offline"}
-              </span>
+              
+              {/* Backend Status */}
+              <div className="flex items-center space-x-2 text-sm">
+                {systemHealth.system_status === "operational" ? (
+                  <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                ) : (
+                  <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                )}
+                <span className={systemHealth.system_status === "operational" ? "text-green-600" : "text-red-600"}>
+                  {systemHealth.system_status === "operational" ? "Backend Online" : "Backend Offline"}
+                </span>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Advanced Options Toggle */}
+      {/* Enhanced Advanced Options with Constitutional Settings */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
         <button
           onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
           className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
         >
           <CogIcon className="h-5 w-5" />
-          <span>Advanced Options</span>
+          <span>Advanced Processing Options</span>
           <ArrowPathIcon className={`h-4 w-4 transform transition-transform ${showAdvancedOptions ? 'rotate-180' : ''}`} />
         </button>
 
         {showAdvancedOptions && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Batch Size
@@ -356,18 +407,37 @@ const DocumentManagementPage = () => {
               </label>
             </div>
 
+            {/* Enhanced: Constitutional Processing Priority */}
+            <div className="flex items-center">
+              <div className="flex items-center space-x-2">
+                <BookOpenIcon className="h-4 w-4 text-amber-500" />
+                <span className="text-sm text-gray-700">Constitutional Priority</span>
+                <InformationCircleIcon className="h-4 w-4 text-gray-400" title="Constitutional documents are processed first" />
+              </div>
+            </div>
+
             <button
               onClick={processDocuments}
               disabled={isProcessing}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center space-x-2"
             >
-              {isProcessing ? "Processing..." : "Process Documents"}
+              {isProcessing ? (
+                <>
+                  <ClockIcon className="h-4 w-4 animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <CogIcon className="h-4 w-4" />
+                  <span>Process Documents</span>
+                </>
+              )}
             </button>
           </div>
         )}
       </div>
 
-      {/* Upload Area */}
+      {/* Enhanced Upload Area */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -382,10 +452,13 @@ const DocumentManagementPage = () => {
         >
           <CloudArrowUpIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-800 mb-2">
-            Drag and drop files here, or click to select
+            Drag and drop legal documents here, or click to select
           </h3>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-gray-600 mb-2">
             Supported formats: PDF, DOCX, DOC, TXT, RTF, PNG, JPG, JPEG, TIFF
+          </p>
+          <p className="text-xs text-amber-600 mb-4">
+            💡 Constitutional documents (Constitution, Fundamental Rights) are automatically prioritized
           </p>
           
           <input
@@ -401,24 +474,35 @@ const DocumentManagementPage = () => {
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
           >
             <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
-            Select Files
+            Select Legal Documents
           </label>
         </div>
 
-        {/* Selected Files Display */}
+        {/* Enhanced Selected Files Display with Constitutional Detection */}
         {selectedFiles.length > 0 && (
           <div className="mt-6">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Selected Files:</h4>
             <div className="space-y-2">
               {selectedFiles.map((file, index) => {
                 const progress = uploadProgress[file.name];
+                const isConstitutional = file.name.toLowerCase().includes('constitution') || 
+                                       file.name.toLowerCase().includes('fundamental');
                 return (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
+                    isConstitutional ? 'bg-amber-50 border border-amber-200' : 'bg-gray-50'
+                  }`}>
                     <div className="flex items-center space-x-3">
-                      {getFileIcon(file.name)}
+                      {getFileIcon(file.name, isConstitutional)}
                       <div>
                         <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                          {isConstitutional && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                              Constitutional
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     
@@ -459,7 +543,7 @@ const DocumentManagementPage = () => {
         )}
       </div>
 
-      {/* Status Messages */}
+      {/* Your existing Status Messages section preserved */}
       {(uploadError || uploadSuccess) && (
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
           {uploadSuccess && (
@@ -477,7 +561,7 @@ const DocumentManagementPage = () => {
         </div>
       )}
 
-      {/* Document List */}
+      {/* Enhanced Document List with Constitutional Classification */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-800">Uploaded Documents</h3>
@@ -499,37 +583,52 @@ const DocumentManagementPage = () => {
           <div className="text-center py-8">
             <FolderOpenIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 mb-2">No documents uploaded yet.</p>
-            <p className="text-sm text-gray-400">Upload legal documents to get started.</p>
+            <p className="text-sm text-gray-400">Upload legal documents to get started with constitutional analysis.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {documents.map((doc, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                <div className="flex items-center space-x-3">
-                  {getFileIcon(doc)}
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{doc}</p>
-                    <p className="text-xs text-gray-500">Legal Document</p>
+            {documents.map((doc, index) => {
+              const docInfo = getDocumentType(doc);
+              const filename = typeof doc === 'string' ? doc : doc.filename;
+              const isConstitutional = docInfo.type === 'Constitutional Document';
+              
+              return (
+                <div key={index} className={`flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 ${
+                  isConstitutional ? 'border-amber-200 bg-amber-50' : 'border-gray-200'
+                }`}>
+                  <div className="flex items-center space-x-3">
+                    {getFileIcon(filename, isConstitutional)}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{filename}</p>
+                      <div className="flex items-center space-x-2">
+                        <p className={`text-xs ${docInfo.color}`}>{docInfo.type}</p>
+                        {docInfo.priority === 'high' && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                            High Priority
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                  
+                  <button
+                    onClick={() => deleteDocument(filename)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
                 </div>
-                
-                <button
-                  onClick={() => deleteDocument(doc)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Processing Stats */}
+      {/* Enhanced Processing Stats with Constitutional Intelligence */}
       {processingStats && (
         <div className="mt-6 bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Processing Statistics</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-blue-600">{processingStats.processing_stats?.total_documents || 0}</p>
               <p className="text-sm text-gray-500">Documents</p>
@@ -547,6 +646,39 @@ const DocumentManagementPage = () => {
               <p className="text-sm text-gray-500">Images</p>
             </div>
           </div>
+
+          {/* Enhanced: Constitutional Analysis Stats */}
+          {processingStats.legal_intelligence && (
+            <div className="border-t pt-4">
+              <h4 className="text-md font-medium text-gray-700 mb-3">Constitutional Analysis</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <p className="text-xl font-bold text-amber-600">
+                    {processingStats.legal_intelligence.constitutional_documents_available ? '✓' : '✗'}
+                  </p>
+                  <p className="text-xs text-gray-500">Constitution Available</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-amber-600">
+                    {processingStats.legal_intelligence.total_constitutional_articles || 0}
+                  </p>
+                  <p className="text-xs text-gray-500">Articles Processed</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-amber-600">
+                    {processingStats.legal_intelligence.constitutional_parts_coverage || 0}
+                  </p>
+                  <p className="text-xs text-gray-500">Constitutional Parts</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-bold text-amber-600">
+                    {processingStats.legal_intelligence.legal_citation_database_size || 0}
+                  </p>
+                  <p className="text-xs text-gray-500">Legal Citations</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

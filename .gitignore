@@ -32,4 +32,5 @@ __pycache__/
 .Python
 
 # Environment variables
-.env
+Server/python_api/.env
+
