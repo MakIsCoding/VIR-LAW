@@ -11,7 +11,7 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
     ...(HF_TOKEN && { 'Authorization': `Bearer ${HF_TOKEN}` })
   },
-  timeout: 90000  // 90 seconds for RAG queries
+  timeout: 120000  // Increase to 120 seconds for file uploads
 });
 
 export { API_BASE_URL, HF_TOKEN };

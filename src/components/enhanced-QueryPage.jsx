@@ -5,7 +5,6 @@ import {
   collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc,
   updateDoc, getDoc
 } from "firebase/firestore";
-import axios from "axios";
 import ReactMarkdown from 'react-markdown';
 import { apiClient, API_BASE_URL, HF_TOKEN } from '../config/api';
 
@@ -350,28 +349,28 @@ const QueryPage = () => {
   // ADDED: Missing file handling functions
   const uploadFilesForQuery = async () => {
     if (selectedFiles.length === 0) return;
-
+  
     try {
       setIsUploadingFiles(true);
       setSendMessageError(null);
-
+  
       const formData = new FormData();
       selectedFiles.forEach(file => {
         formData.append('files', file);
       });
       formData.append('temporary', 'true');
-
+  
       selectedFiles.forEach(file => {
         setUploadProgress(prev => ({
           ...prev,
           [file.name]: { status: 'uploading', progress: 0 }
         }));
       });
-
-      const response = await axios.post(`${API_BASE_URL}/upload-documents`, formData, {
+  
+      // ✅ FIXED: Use apiClient instead of axios
+      const response = await apiClient.post('/upload-documents', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          ...(HF_TOKEN && { 'Authorization': `Bearer ${HF_TOKEN}` })
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -381,19 +380,20 @@ const QueryPage = () => {
               [file.name]: { status: 'uploading', progress: percentCompleted }
             }));
           });
-        }
+        },
+        timeout: 120000, // 2 minutes for large files
       });
-
+  
       const { uploaded } = response.data;
       setTempUploadedFiles(uploaded);
-
+  
       uploaded.forEach(file => {
         setUploadProgress(prev => ({
           ...prev,
           [file.filename]: { status: 'success', progress: 100 }
         }));
       });
-
+  
     } catch (error) {
       console.error("Error uploading files for query:", error);
       setSendMessageError("Failed to upload files for query. Please try again.");
@@ -408,6 +408,7 @@ const QueryPage = () => {
       setIsUploadingFiles(false);
     }
   };
+  
 
   // ADDED: Missing drag and drop handlers
   const handleDragEnter = (e) => {
