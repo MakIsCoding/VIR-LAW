@@ -1,6 +1,6 @@
 // API Configuration for Hugging Face Space Backend
-const API_BASE_URL = process.env.REACT_APP_API_URL || "https://MakIsCoding-VirLaw.hf.space";
-const HF_TOKEN = process.env.REACT_APP_HF_TOKEN;
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://makiscoding-virlaw.hf.space";
+const HF_TOKEN = import.meta.env.VITE_HF_TOKEN;
 
 import axios from 'axios';
 
