@@ -1,8 +1,9 @@
-// 🚀 ULTIMATE Enhanced Settings & Help Page - All Features Unlocked
+// ULTIMATE Enhanced Settings & Help Page
 // Complete configuration, advanced settings, and comprehensive help system
 
 import React, { useState, useEffect } from "react";
 import { auth } from "../firebase";
+import { apiClient } from '../config/api';
 import axios from "axios";
 import {
   CogIcon, QuestionMarkCircleIcon, DocumentTextIcon,
@@ -45,9 +46,10 @@ const UltimateSettingsHelpPage = () => {
       setIsLoading(true);
       
       const [healthResponse, queryTypesResponse] = await Promise.all([
-        axios.get("http://localhost:8000/health"),
-        axios.get("http://localhost:8000/query-types")
+        apiClient.get("/health"),
+        apiClient.get("/query-types")
       ]);
+      
       
       setSystemHealth(healthResponse.data);
       setAvailableQueryTypes(queryTypesResponse.data.query_types);

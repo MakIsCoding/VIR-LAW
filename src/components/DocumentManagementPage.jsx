@@ -1,6 +1,7 @@
 // ENHANCED DocumentManagementPage.jsx - Constitutional intelligence for processing only
 import React, { useState, useEffect, useCallback } from "react";
 import { auth } from "../firebase";
+import { apiClient, API_BASE_URL, HF_TOKEN } from '../config/api';
 import axios from "axios";
 import {
   DocumentPlusIcon, DocumentIcon, TrashIcon, ArrowUpTrayIcon,
@@ -50,7 +51,7 @@ const DocumentManagementPage = () => {
   const loadDocuments = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("http://localhost:8000/document-list");
+      const response = await apiClient.get("/document-list");
       setDocuments(response.data.documents || []);
     } catch (error) {
       console.error("Error loading documents:", error);
@@ -63,7 +64,7 @@ const DocumentManagementPage = () => {
   // Enhanced: Load system health with constitutional readiness
   const loadSystemHealth = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/health");
+      const response = await apiClient.get("/health");
       setSystemHealth(response.data);
     } catch (error) {
       console.error("Error loading system health:", error);
@@ -73,7 +74,7 @@ const DocumentManagementPage = () => {
   // Enhanced: Load processing statistics with legal intelligence
   const loadProcessingStats = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/system-stats");
+      const response = await apiClient.get("/system-stats");
       setProcessingStats(response.data);
     } catch (error) {
       console.error("Error loading processing stats:", error);
@@ -136,9 +137,10 @@ const DocumentManagementPage = () => {
         }));
       });
 
-      const response = await axios.post("http://localhost:8000/upload-documents", formData, {
+      const response = await axios.post(`${API_BASE_URL}/upload-documents`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...(HF_TOKEN && { 'Authorization': `Bearer ${HF_TOKEN}` })
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -212,7 +214,7 @@ const DocumentManagementPage = () => {
       setUploadSuccess(null);
 
       // Enhanced: Use ultimate processing endpoint with constitutional intelligence
-      const response = await axios.post("http://localhost:8000/process-documents-ultimate", {
+      const response = await apiClient.post("/process-documents-ultimate", {
         documents_dir: "./legal_documents",
         batch_size: batchSize
       });

@@ -1,8 +1,10 @@
-// 🚀 ULTIMATE System Dashboard - Real-time Monitoring & Analytics
+// ULTIMATE System Dashboard - Real-time Monitoring & Analytics
 // Complete system health, performance metrics, and advanced monitoring
 
 import React, { useState, useEffect } from "react";
 import { auth } from "../firebase";
+import { apiClient } from '../config/api';
+
 import axios from "axios";
 import {
   ChartBarIcon, ServerIcon, ClockIcon, CheckCircleIcon,
@@ -39,8 +41,8 @@ const SystemDashboard = () => {
       setIsLoading(true);
       
       const [healthResponse, statsResponse] = await Promise.all([
-        axios.get("http://localhost:8000/health"),
-        axios.get("http://localhost:8000/system-stats")
+        apiClient.get("/health"),
+        apiClient.get("/system-stats")
       ]);
       
       setSystemHealth(healthResponse.data);

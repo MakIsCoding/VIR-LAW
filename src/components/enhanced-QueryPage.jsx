@@ -6,7 +6,9 @@ import {
   updateDoc, getDoc
 } from "firebase/firestore";
 import axios from "axios";
-import ReactMarkdown from 'react-markdown'; // ← ADD THIS LINE
+import ReactMarkdown from 'react-markdown';
+import { apiClient, API_BASE_URL, HF_TOKEN } from '../config/api';
+
 import {
   DocumentTextIcon, TableCellsIcon, PhotoIcon, ScaleIcon, ClockIcon,
   CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon,
@@ -93,7 +95,7 @@ const QueryPage = () => {
     // Optional: Try backend connection in background (won't block UI)
     const checkBackend = async () => {
       try {
-        await axios.get("http://localhost:8000/health", { timeout: 1000 });
+        await apiClient.get("/health", { timeout: 5000 });
         setSystemHealth({ system_status: "online", backend_available: true });
         console.log("✅ Backend available");
       } catch (error) {
@@ -230,9 +232,7 @@ const QueryPage = () => {
                                   userMessage.toLowerCase().includes('fundamental right') ||
                                   userMessage.toLowerCase().includes('directive principle');
 
-      const endpoint = isConstitutionalQuery ? 
-        "http://localhost:8000/ultimate-query" : 
-        "http://localhost:8000/gemini-rag";
+      const endpoint = isConstitutionalQuery ? '/ultimate-query' : '/gemini-rag';
 
       // Enhanced: Prepare request data with chat history context
       const requestData = {
@@ -249,7 +249,7 @@ const QueryPage = () => {
         ...(tempUploadedFiles.length > 0 && { temp_files: tempUploadedFiles })
       };
 
-      const ragResponse = await axios.post(endpoint, requestData);
+      const ragResponse = await apiClient.post(endpoint, requestData);
       const data = ragResponse.data;
 
       aiResponseText = data.response;
@@ -368,9 +368,10 @@ const QueryPage = () => {
         }));
       });
 
-      const response = await axios.post("http://localhost:8000/upload-documents", formData, {
+      const response = await axios.post(`${API_BASE_URL}/upload-documents`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...(HF_TOKEN && { 'Authorization': `Bearer ${HF_TOKEN}` })
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
