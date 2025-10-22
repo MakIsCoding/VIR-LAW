@@ -1,7 +1,4 @@
-# 🏛️ ULTIMATE Virtual Legal Assistant - Complete Advanced Backend
-
-# ALL CAPABILITIES UNLOCKED - 2025 State-of-the-Art Legal RAG System
-
+#imports
 import os
 import base64
 import json
@@ -18,6 +15,11 @@ import re
 # Document processing
 from unstructured.partition.pdf import partition_pdf
 from PIL import Image
+
+#persistent state
+from pathlib import Path  
+from langchain_core.stores import BaseStore
+from typing import Iterator, List, Optional, Sequence
 
 # Environment and API keys
 from dotenv import load_dotenv
@@ -43,7 +45,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-# Document handling (keep only what's used)
+# Document handling
 from docx import Document as DocxDocument
 
 import sys, io, logging  # keep near other imports
@@ -71,12 +73,276 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
+from langchain_core.stores import BaseStore
+from typing import Iterator, List, Optional, Sequence
+
+class PersistentDocStore(BaseStore[str, Document]):
+    """LangChain-compatible persistent document store"""
+    def __init__(self, persist_directory):
+        self.persist_dir = Path(persist_directory)
+        self.persist_dir.mkdir(parents=True, exist_ok=True)
+        self.doc_file = self.persist_dir / "documents.json"
+        self._docs = self._load_docs()
+        self._loaded_from_disk = len(self._docs) > 0
+    
+    def _load_docs(self):
+        if self.doc_file.exists():
+            try:
+                with open(self.doc_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if data:
+                        logger.info(f"📂 Loaded {len(data)} documents from {self.doc_file}")
+                    return data
+            except Exception as e:
+                logger.warning(f"Failed to load docs from {self.doc_file}: {e}")
+        return {}
+    
+    def _save_docs(self):
+        try:
+            if self._docs:  # Only save if we have documents
+                with open(self.doc_file, 'w', encoding='utf-8') as f:
+                    json.dump(self._docs, f, ensure_ascii=False, indent=1)
+        except Exception as e:
+            logger.error(f"Failed to save docs: {e}")
+    
+    def mget(self, keys: Sequence[str]) -> List[Optional[Document]]:
+        """LangChain-compatible mget method"""
+        results = []
+        for key in keys:
+            if key in self._docs:
+                doc_data = self._docs[key]
+                if isinstance(doc_data, dict) and 'page_content' in doc_data:
+                    results.append(Document(
+                        page_content=doc_data['page_content'],
+                        metadata=doc_data['metadata']
+                    ))
+                else:
+                    results.append(Document(page_content=str(doc_data), metadata={}))
+            else:
+                results.append(None)
+        return results
+    
+    def mset(self, key_value_pairs: Sequence[tuple[str, Document]]) -> None:
+        """LangChain-compatible mset method"""
+        for key, value in key_value_pairs:
+            if hasattr(value, 'page_content') and hasattr(value, 'metadata'):
+                self._docs[key] = {
+                    'page_content': value.page_content,
+                    'metadata': value.metadata or {}
+                }
+            else:
+                self._docs[key] = str(value)
+        self._save_docs()
+    
+    def mdelete(self, keys: Sequence[str]) -> None:
+        """LangChain-compatible mdelete method"""
+        for key in keys:
+            self._docs.pop(key, None)
+        self._save_docs()
+    
+    def yield_keys(self, prefix: Optional[str] = None) -> Iterator[str]:
+        """LangChain-compatible key iteration"""
+        for key in self._docs.keys():
+            if prefix is None or key.startswith(prefix):
+                yield key
+    
+    # Backwards compatibility methods
+    def delete(self, keys):
+        """Backwards compatibility with your existing code"""
+        if isinstance(keys, str):
+            keys = [keys]
+        self.mdelete(keys)
+    
+    def __len__(self):
+        return len(self._docs)
+    
+    @property
+    def store(self):
+        """Compatibility property for existing code that accesses .store"""
+        return self._docs
+
+class LegalAPIManager:
+    """Central manager for 3-tier API fallback with advanced legal parameters"""
+    
+    def __init__(self, groq_client, gemini_clients, available_groq_models):
+        self.groq_client = groq_client
+        self.gemini_clients = gemini_clients
+        self.available_groq_models = available_groq_models
+        
+        # Simple usage tracking
+        self.gemini_usage = [
+            {"requests_today": 0, "date": datetime.now().date()},
+            {"requests_today": 0, "date": datetime.now().date()}
+        ]
+        
+        #  legal processing parameters
+        self.legal_parameters = {
+            'constitutional': {
+                'temperature': 0.05,  # Very precise for constitutional analysis
+                'top_p': 0.90,
+                'top_k': 15,
+                'max_tokens': 4096
+            },
+            'statutory': {
+                'temperature': 0.1,   # Precise for statutory interpretation
+                'top_p': 0.95,
+                'top_k': 20,
+                'max_tokens': 3500
+            },
+            'case_analysis': {
+                'temperature': 0.15,  # Slightly more flexible for case reasoning
+                'top_p': 0.95,
+                'top_k': 25,
+                'max_tokens': 4000
+            },
+            'general_legal': {
+                'temperature': 0.1,   # Balanced precision
+                'top_p': 0.95,
+                'top_k': 20,
+                'max_tokens': 4096
+            }
+        }
+    
+    def _reset_daily_counters(self):
+        """Reset Gemini counters at midnight"""
+        today = datetime.now().date()
+        for i in range(len(self.gemini_usage)):
+            if self.gemini_usage[i]["date"] < today:
+                self.gemini_usage[i]["requests_today"] = 0
+                self.gemini_usage[i]["date"] = today
+    
+    def _get_legal_parameters(self, legal_context: Dict = None, content_type: str = "text") -> Dict:
+        """Get optimal parameters based on legal context"""
+        if legal_context:
+            # Constitutional content gets highest precision
+            if legal_context.get('is_constitutional', False):
+                return self.legal_parameters['constitutional']
+            # Case analysis gets moderate flexibility
+            elif legal_context.get('query_type') == 'case_analysis':
+                return self.legal_parameters['case_analysis']
+            # Statutory interpretation gets high precision
+            elif legal_context.get('query_type') == 'statutory_interpretation':
+                return self.legal_parameters['statutory']
+        
+        # Default legal parameters
+        return self.legal_parameters['general_legal']
+    
+    def generate(self, prompt: str, legal_context: Dict = None, content_type: str = "text"):
+        """Main generation with 3-tier fallback and legal parameters"""
+        
+        # Get optimal parameters for this legal content
+        params = self._get_legal_parameters(legal_context, content_type)
+        
+        # TIER 1: Groq Llama 3.3 70B (Primary - Best Quality)
+        if self.groq_client and "llama-3.3-70b-versatile" in self.available_groq_models:
+            try:
+                logger.info(f"🥇 Trying Groq Llama 3.3 70B (T={params['temperature']}, tokens={params['max_tokens']})")
+                
+                response = self.groq_client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=params['temperature'],
+                    max_tokens=params['max_tokens'],
+                    timeout=30,
+                    # Additional Groq-specific parameters
+                    top_p=0.95,  # Groq uses top_p differently
+                    frequency_penalty=0.1,  # Reduce repetition in legal text
+                    presence_penalty=0.1    # Encourage diverse legal concepts
+                )
+                
+                result = response.choices[0].message.content
+                logger.info(f"✅ Groq 3.3 70B: SUCCESS (Legal parameters: T={params['temperature']})")
+                return result, "groq_llama_3.3"
+                
+            except Exception as e:
+                logger.warning(f"🥇 Groq 3.3 70B failed: {e}")
+        
+        # TIER 2 & 3: Gemini Keys with advanced parameters
+        return self._generate_with_gemini_advanced(prompt, params, legal_context)
+    
+    def _generate_with_gemini_advanced(self, prompt: str, params: Dict, legal_context: Dict = None):
+        """Advanced Gemini generation with legal parameters"""
+        self._reset_daily_counters()
+        
+        # GEMINI KEY 1
+        if len(self.gemini_clients) > 0 and self.gemini_clients[0] and self.gemini_usage[0]["requests_today"] < 200:
+            try:
+                logger.info(f"🥈 Trying Gemini Key 1 ({self.gemini_usage[0]['requests_today']}/200 used, T={params['temperature']})")
+                
+                # Configure Gemini client with legal parameters
+                generation_config = {
+                    "temperature": params['temperature'],
+                    "top_p": params['top_p'],
+                    "top_k": params['top_k'],
+                    "max_output_tokens": params['max_tokens'],
+                    "candidate_count": 1,
+                    "stop_sequences": []  # Let legal responses complete naturally
+                }
+                
+                response = self.gemini_clients[0].generate_content(
+                    prompt,
+                    generation_config=generation_config
+                )
+                self.gemini_usage[0]["requests_today"] += 1
+                
+                logger.info(f"✅ Gemini Key 1: SUCCESS (Legal T={params['temperature']})")
+                return response.text, "gemini_key_1"
+                
+            except Exception as e:
+                logger.warning(f"🥈 Gemini Key 1 failed: {e}")
+                if "quota" in str(e).lower() or "limit" in str(e).lower():
+                    self.gemini_usage[0]["requests_today"] = 200
+        
+        # GEMINI KEY 2
+        if len(self.gemini_clients) > 1 and self.gemini_clients[1] and self.gemini_usage[1]["requests_today"] < 200:
+            try:
+                logger.info(f"🥉 Trying Gemini Key 2 ({self.gemini_usage[1]['requests_today']}/200 used, T={params['temperature']})")
+                
+                # Same advanced configuration for Key 2
+                generation_config = {
+                    "temperature": params['temperature'],
+                    "top_p": params['top_p'],
+                    "top_k": params['top_k'],
+                    "max_output_tokens": params['max_tokens'],
+                    "candidate_count": 1,
+                    "stop_sequences": []
+                }
+                
+                response = self.gemini_clients[1].generate_content(
+                    prompt,
+                    generation_config=generation_config
+                )
+                self.gemini_usage[1]["requests_today"] += 1
+                
+                logger.info(f"✅ Gemini Key 2: SUCCESS (Legal T={params['temperature']})")
+                return response.text, "gemini_key_2"
+                
+            except Exception as e:
+                logger.warning(f"🥉 Gemini Key 2 failed: {e}")
+        
+        raise Exception("🔴 All API tiers exhausted - no available models")
+    
+    def generate_summary(self, prompt: str, legal_context: Dict = None, content_type: str = "text"):
+        """For document summarization: Use 3-tier fallback with legal parameters"""
+        logger.info("📄 Document summarization mode - 3-tier fallback with legal tuning")
+        return self.generate(prompt, legal_context, content_type)
+    
+    def generate_query_answer(self, prompt: str, legal_context: Dict = None, content_type: str = "text"):
+        """For user queries: Use only Gemini with legal parameters"""
+        logger.info("🔍 User query mode - Gemini-only fallback with legal tuning")
+        
+        # Get optimal parameters for this legal query
+        params = self._get_legal_parameters(legal_context, content_type)
+        
+        return self._generate_with_gemini_advanced(prompt, params, legal_context)
+
+
 class UltimateLegalAssistant:
     """
     ULTIMATE Virtual Legal Assistant for Indian Law
     ALL ADVANCED CAPABILITIES:
     - Multi-modal RAG (text, tables, images, handwritten notes)
-    - Google Gemini 2.0 Flash + Pro models
+    - Google Gemini 2.0 Flash model
     - Groq Llama 3.3 70B ultra-fast inference
     - Advanced ChromaDB with hybrid search
     - Document preprocessing pipeline
@@ -151,6 +417,32 @@ class UltimateLegalAssistant:
             logger.error(f"❌ Critical error during initialization: {e}")
             logger.error(traceback.format_exc())
             raise
+
+    def _safe_get_metadata(self, metadata: Dict, key: str, default: Any = None) -> Any:
+        """
+        Safely get metadata value trying multiple key formats.
+        Handles inconsistencies between source_file/sourcefile and page_number/pagenumber.
+        """
+        # Try exact key first
+        if key in metadata:
+            return metadata[key]
+        
+        # Try alternate formats
+        alternates = {
+            'sourcefile': ['source_file', 'document_name', 'filename'],
+            'source_file': ['sourcefile', 'document_name', 'filename'],
+            'page_number': ['pagenumber', 'page', 'page_num'],
+            'pagenumber': ['page_number', 'page', 'page_num'],
+            'document_name': ['sourcefile', 'source_file', 'filename'],
+        }
+        
+        if key in alternates:
+            for alt_key in alternates[key]:
+                if alt_key in metadata and metadata[alt_key] is not None:
+                    return metadata[alt_key]
+        
+        return default
+
 
     def __enter__(self):
         """Context manager entry"""
@@ -258,34 +550,59 @@ class UltimateLegalAssistant:
             logger.error(f"❌ Failed to save persistent state: {e}")
 
     def _repopulate_docstore_on_startup(self):
-        """Repopulate docstore from persistent state after server restart"""
+        """Smart repopulation - only when actually needed"""
+        logger.info("🔄 Checking docstore status...")
+        
         try:
-            logger.info("🔄 Checking docstore population...")
-            
             # Check if any docstore is empty despite having vectors
             docstores_empty = True
             vectorstores_have_data = False
+            repopulation_needed = False
             
             for content_type, retriever in self.retrievers.items():
-                # Check if vectorstore has data
-                if hasattr(retriever, 'vectorstore'):
-                    vectorstore_data = retriever.vectorstore.get()
-                    if vectorstore_data and len(vectorstore_data.get('ids', [])) > 0:
-                        vectorstores_have_data = True
-                
-                # Check if docstore is empty
-                if hasattr(retriever, 'docstore') and hasattr(retriever.docstore, 'store'):
-                    if len(retriever.docstore.store) > 0:
-                        docstores_empty = False
-                        logger.info(f"🔄 {content_type} docstore has {len(retriever.docstore.store)} docs")
+                try:
+                    # Check if vectorstore has data
+                    vector_count = 0
+                    if hasattr(retriever, 'vectorstore'):
+                        vectorstore_data = retriever.vectorstore.get()
+                        if vectorstore_data and len(vectorstore_data.get('ids', [])) > 0:
+                            vectorstores_have_data = True
+                            vector_count = len(vectorstore_data.get('ids', []))
+                    
+                    # Check docstore data (works with both InMemoryStore and PersistentDocStore)
+                    doc_count = 0
+                    if hasattr(retriever, 'docstore'):
+                        if hasattr(retriever.docstore, 'store'):
+                            # InMemoryStore style
+                            doc_count = len(retriever.docstore.store)
+                            if doc_count > 0:
+                                docstores_empty = False
+                        elif hasattr(retriever.docstore, '__len__'):
+                            # PersistentDocStore style  
+                            doc_count = len(retriever.docstore)
+                            if doc_count > 0:
+                                docstores_empty = False
+                    
+                    logger.info(f"📊 {content_type}: {vector_count} vectors, {doc_count} documents")
+                    
+                    # Check if this content type needs repopulation
+                    if vector_count > 0 and doc_count == 0:
+                        logger.warning(f"⚠️ Missing documents for {content_type} - repopulation needed")
+                        repopulation_needed = True
+                    elif vector_count > 0 and doc_count > 0:
+                        logger.info(f"✅ {content_type}: Data intact")
+                        
+                except Exception as e:
+                    logger.error(f"Error checking {content_type}: {e}")
+                    continue
             
             # If we have vectors but no docstore data, force reprocessing
-            if vectorstores_have_data and docstores_empty:
-                logger.info("🔄 Vectors exist but docstore is empty, forcing reprocessing...")
+            if vectorstores_have_data and (docstores_empty or repopulation_needed):
+                logger.warning("🔄 Vectors exist but docstore is incomplete, forcing reprocessing...")
                 
                 # Clear processing state to bypass deduplication
-                if os.path.exists('.processing_state.json'):
-                    os.remove('.processing_state.json')
+                if os.path.exists('./processing_state.json'):
+                    os.remove('./processing_state.json')
                     logger.info("🔄 Cleared processing state to bypass deduplication")
                 
                 # Reset processing flags
@@ -298,10 +615,15 @@ class UltimateLegalAssistant:
                 
                 logger.info("🔄 Forced reprocessing will repopulate docstore")
             else:
-                logger.info(f"🔄 Docstore check: vectors={vectorstores_have_data}, docstore_empty={docstores_empty}")
-                
+                if not vectorstores_have_data:
+                    logger.info("ℹ️ No vectors found - fresh system, processing will be needed")
+                else:
+                    logger.info("✅ No repopulation needed - all data intact")
+                    
         except Exception as e:
-            logger.error(f"❌ Error in docstore repopulation: {e}")
+            logger.error(f"❌ Error in docstore status check: {e}")
+            # Safe fallback - force reprocessing if anything goes wrong
+            self.documents_processed = False
 
 
     def check_document_already_processed(self, filepath: str) -> bool:
@@ -321,35 +643,11 @@ class UltimateLegalAssistant:
     
     
     def setup_apis(self):
-        """Setup ALL available APIs with advanced configuration"""
+        """Setup APIs with dual Gemini keys"""
         try:
-            # Google Gemini API with multiple models
-            self.gemini_api_key = os.getenv("GEMINI_API_KEY")
-            if not self.gemini_api_key:
-                raise ValueError("GEMINI_API_KEY not found in environment")
-            genai.configure(api_key=self.gemini_api_key)
-
-            # Advanced safety settings for legal content
-            self.safety_settings = [
-            {"category": HarmCategory.HARM_CATEGORY_HATE_SPEECH, "threshold": HarmBlockThreshold.BLOCK_NONE},
-            {"category": HarmCategory.HARM_CATEGORY_HARASSMENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
-            {"category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, "threshold": HarmBlockThreshold.BLOCK_NONE},
-            {"category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
-            ]
-            self.gemini_flash = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            safety_settings=self.safety_settings,
-            generation_config={
-                "temperature": 0.1,
-                "top_p": 0.95,
-                "top_k": 20,
-                "max_output_tokens": 4096,
-            },
-            )
-            self.has_gemini_pro = False
-            self.gemini_pro = None
-
-            # Groq API with multiple models
+            logger.info("🏗️ Setting up Triple-Tier API system...")
+            
+            # GROQ SETUP
             self.groq_api_key = os.getenv("GROQ_API_KEY")
             if self.groq_api_key:
                 self.groq_client = Groq(api_key=self.groq_api_key)
@@ -360,14 +658,73 @@ class UltimateLegalAssistant:
                 ]
                 logger.info("Groq API configured with multiple models")
             else:
-                logger.warning(" GROQ_API_KEY not found, will use only Gemini")
+                logger.warning("GROQ_API_KEY not found")
                 self.groq_client = None
-
-            logger.info(" All available APIs configured successfully")
-
+                self.available_groq_models = []
+            
+            # DUAL GEMINI SETUP
+            gemini_key_1 = os.getenv("GEMINI_API_KEY_1") or os.getenv("GEMINI_API_KEY")  # Backward compatible
+            gemini_key_2 = os.getenv("GEMINI_API_KEY_2")
+            
+            self.safety_settings = [
+                {"category": HarmCategory.HARM_CATEGORY_HATE_SPEECH, "threshold": HarmBlockThreshold.BLOCK_NONE},
+                {"category": HarmCategory.HARM_CATEGORY_HARASSMENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
+                {"category": HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, "threshold": HarmBlockThreshold.BLOCK_NONE},
+                {"category": HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, "threshold": HarmBlockThreshold.BLOCK_NONE},
+            ]
+            
+            self.gemini_clients = []
+            
+            # Setup Key 1
+            if gemini_key_1:
+                genai.configure(api_key=gemini_key_1)
+                client1 = genai.GenerativeModel(
+                    model_name="gemini-2.0-flash",
+                    safety_settings=self.safety_settings,
+                    generation_config={
+                        "temperature": 0.1,
+                        "top_p": 0.95,
+                        "top_k": 20,
+                        "max_output_tokens": 4096,
+                    }
+                )
+                self.gemini_clients.append(client1)
+                logger.info("🥈 Gemini Key 1 configured")
+            
+            # Setup Key 2
+            if gemini_key_2:
+                genai.configure(api_key=gemini_key_2)
+                client2 = genai.GenerativeModel(
+                    model_name="gemini-2.0-flash",
+                    safety_settings=self.safety_settings,
+                    generation_config={
+                        "temperature": 0.1,
+                        "top_p": 0.95,
+                        "top_k": 20,
+                        "max_output_tokens": 4096,
+                    }
+                )
+                self.gemini_clients.append(client2)
+                logger.info("🥉 Gemini Key 2 configured")
+            
+            # CREATE THE CENTRAL MANAGER
+            self.api_manager = LegalAPIManager(
+                groq_client=self.groq_client,
+                gemini_clients=self.gemini_clients,
+                available_groq_models=self.available_groq_models
+            )
+            
+            # Backward compatibility (keep these for any legacy code)
+            self.gemini_flash = self.gemini_clients[0] if self.gemini_clients else None
+            self.has_gemini_pro = False
+            self.gemini_pro = None
+            
+            logger.info("✅ Triple-Tier API system configured successfully")
+            
         except Exception as e:
-            logger.error(f" Error setting up APIs: {e}")
+            logger.error(f"❌ Error setting up APIs: {e}")
             raise
+
     def setup_embeddings(self):
         """Setup InLegalBERT embedding model optimized for Indian legal documents"""
         try:
@@ -461,7 +818,7 @@ class UltimateLegalAssistant:
             logger.warning(f" Chroma persist warning: {e}")
 
     def setup_vector_stores(self):
-        """Setup advanced ChromaDB with performance optimizations"""
+        """Setup advanced ChromaDB with performance optimizations + IMPROVED RETRIEVERS"""
         try:
             # Performance-optimized ChromaDB settings
             from chromadb.config import Settings
@@ -515,8 +872,43 @@ class UltimateLegalAssistant:
                 )
             }
 
-            # Pre-allocate in-memory stores
-            self.doc_stores = {k: InMemoryStore() for k in ['text', 'tables', 'images', 'citations']}
+            # Pre-allocate persistent document stores (was InMemoryStore)
+            self.doc_stores = {
+                'text': PersistentDocStore("./persistent_docstore/text"),
+                'tables': PersistentDocStore("./persistent_docstore/tables"),
+                'images': PersistentDocStore("./persistent_docstore/images"),
+                'citations': PersistentDocStore("./persistent_docstore/citations")
+            }
+            logger.info("✅ Persistent document stores initialized")
+
+            #  NEW: Setup retrievers with IMPROVED quality parameters
+            self.retrievers = {
+                'text': self.vector_stores['text'].as_retriever(
+                    search_type="mmr",
+                    search_kwargs={
+                        "k": 15,                # Return top 15 results
+                        "fetch_k": 200,         # REDUCED from 300 (less noise)
+                        "lambda_mult": 0.7,     # INCREASED from 0.5 (more relevance, less diversity)
+                    }
+                ),
+                'citations': self.vector_stores['citations'].as_retriever(
+                    search_type="mmr",
+                    search_kwargs={
+                        "k": 10,                # Return top 10 citations
+                        "fetch_k": 100,         # REDUCED from 150
+                        "lambda_mult": 0.7,     # INCREASED from 0.5
+                    }
+                ),
+                'tables': self.vector_stores['tables'].as_retriever(
+                    search_type="similarity",
+                    search_kwargs={"k": 5}      # Tables don't need MMR
+                ),
+                'images': self.vector_stores['images'].as_retriever(
+                    search_type="similarity",
+                    search_kwargs={"k": 3}      # Images don't need MMR
+                )
+            }
+            logger.info("✅ Retrievers configured with optimized MMR parameters")
             
         except Exception as e:
             logger.error(f"Vector store setup failed: {e}")
@@ -524,23 +916,25 @@ class UltimateLegalAssistant:
 
 
     def setup_retrievers(self):
-        """Setup advanced multi-vector retrievers with custom parameters"""
+        """Setup advanced multi-vector retrievers with custom parameters optimized for article-level retrieval"""
         try:
             self.id_key = "doc_id"
 
-            # MMR knobs per content type
+            # ⚡ OPTIMIZED: Tuned for fundamental-rights-pdf.pdf with 29 parents, 66 child vectors
             text_kwargs = {
-                "k": 15,           # More articles needed for constitutional queries
-                "fetch_k": 100,    # Large pool for constitutional cross-references  
-                "lambda_mult": 0.3  # Maximum diversity for different constitutional concepts
-            } # balanced recall/diversity
-            table_kwargs = {"k": 5, "fetch_k": 30, "lambda_mult": 0.6} # prefer tables with some variety
-            image_kwargs = {"k": 3, "fetch_k": 20, "lambda_mult": 0.7} # visuals, keep compact
+                "k": 20,            # Retrieve more parent docs for better coverage
+                "fetch_k": 300,     # Scan ALL child vectors 
+                "lambda_mult": 0.5  # LESS diversity = MORE relevance (article-specific queries need precision)
+            }
+            
+
+            table_kwargs = {"k": 5, "fetch_k": 30, "lambda_mult": 0.6}
+            image_kwargs = {"k": 3, "fetch_k": 20, "lambda_mult": 0.7}
             cite_kwargs = {
-                "k": 12,           # Constitution has extensive amendment citations
-                "fetch_k": 60,     
-                "lambda_mult": 0.2  # Maximum diversity for different amendments/cases
-            } # cite SCC/AIR patterns w/o repetition
+                "k": 12,
+                "fetch_k": 60,
+                "lambda_mult": 0.2
+            }
 
             self.retrievers = {
                 'texts': MultiVectorRetriever(
@@ -573,7 +967,10 @@ class UltimateLegalAssistant:
                 ),
             }
 
-            logger.info("Advanced retrievers configured with MMR and hybrid search strategies")
+            # 🔍 DIAGNOSTIC: Log effective retriever parameters
+            logger.info("🔧 Advanced retrievers configured with optimized MMR parameters")
+            logger.info(f"   Text retriever: k={text_kwargs['k']}, fetch_k={text_kwargs['fetch_k']}, lambda={text_kwargs['lambda_mult']}")
+            logger.info(f"   → Optimized for article-level precision with {len(self.vector_stores['text'].get()['ids'])} vectors")
 
         except Exception as e:
             logger.error(f"Error setting up retrievers: {e}")
@@ -586,6 +983,15 @@ class UltimateLegalAssistant:
             self.prompt_templates = {
                 'general_analysis': """
     You are VirLaw AI, India's most advanced Virtual Legal Assistant specializing in Indian Constitutional and Statutory Law.
+
+    DOCUMENT VERIFICATION PROTOCOL:
+    • FIRST: Carefully examine the provided constitutional context and source documents below for relevant information
+    • If the query can be fully answered using the provided documents, base your response ENTIRELY on those documents with precise citations
+    • If the provided documents contain SOME relevant information, use that first and supplement with training knowledge while clearly distinguishing between document-based and training-based information
+    • If the provided documents do NOT contain relevant information for the specific query, AND you have verified that NONE of the source documents mention the queried articles/provisions, ONLY THEN state: "The provided documents don't contain information about [specific article/provision], but according to constitutional law principles, I can provide the following analysis:"
+    • ALWAYS prioritize document-based information over training knowledge when documents are available
+    • Cite specific document sections, articles, or page references when using document content
+    • IMPORTANT: If you see ANY constitutional documents in the sources (even if mixed with other content), assume they contain relevant information and answer confidently without disclaimers
 
     EXPERTISE AREAS:
     • Constitutional Law (Articles 1-395, Fundamental Rights, DPSP, Union-State Relations)
@@ -627,6 +1033,15 @@ class UltimateLegalAssistant:
                 'case_analysis': """
     You are analyzing Indian legal cases with focus on constitutional and statutory precedents:
 
+    DOCUMENT VERIFICATION PROTOCOL:
+    • FIRST: Thoroughly examine the provided legal context and source documents for case-specific information
+    • If the case details are fully covered in the provided documents, base your analysis ENTIRELY on those documents with exact citations
+    • If documents contain PARTIAL case information, use that as primary source and supplement with training knowledge while clearly marking the distinction
+    • If the provided documents do NOT contain information about the specific case, AND you have verified that NONE of the source documents mention the case name or citation, ONLY THEN state: "The provided documents don't contain information about [specific case], but according to legal precedent, I can provide the following analysis:"
+    • ALWAYS prioritize document-based case analysis over training knowledge when documents are available
+    • Cite specific document sections, page numbers, or case citations when using document content
+    • IMPORTANT: If you see ANY legal documents in the sources, assume they contain relevant information and analyze confidently
+
     ENHANCED CASE ANALYSIS FRAMEWORK:
     1. CASE CITATION & COURT HIERARCHY: Full citation, court level, bench composition
     2. CONSTITUTIONAL/STATUTORY PROVISIONS: Specific articles/sections interpreted
@@ -647,6 +1062,15 @@ class UltimateLegalAssistant:
 
                 'statutory_interpretation': """
     You are interpreting Indian statutory provisions within constitutional framework:
+
+    DOCUMENT VERIFICATION PROTOCOL:
+    • FIRST: Systematically review the provided statutory context and source documents for relevant provisions
+    • If the statutory provisions are fully covered in the provided documents, base your interpretation ENTIRELY on those documents with precise section references
+    • If documents contain SOME statutory information, use that as primary source and supplement with training knowledge while clearly distinguishing sources
+    • If the provided documents do NOT contain information about the specific statutory provision, AND you have verified that NONE of the source documents mention the statute or section, ONLY THEN state: "The provided documents don't contain information about [specific provision], but according to statutory interpretation principles, I can provide the following analysis:"
+    • ALWAYS prioritize document-based statutory interpretation over training knowledge when documents are available
+    • Cite specific document sections, subsections, or page references when using document content
+    • IMPORTANT: If you see ANY statutory documents in the sources, assume they contain relevant information and interpret confidently
 
     CONSTITUTIONAL-STATUTORY INTERPRETATION FRAMEWORK:
     1. LITERAL MEANING: Plain text interpretation using constitutional lens
@@ -669,6 +1093,15 @@ class UltimateLegalAssistant:
                 'procedure_guidance': """
     You are providing constitutional and legal procedural guidance:
 
+    DOCUMENT VERIFICATION PROTOCOL:
+    • FIRST: Carefully examine the provided procedural context and source documents for relevant procedural information
+    • If the procedural requirements are fully covered in the provided documents, base your guidance ENTIRELY on those documents with specific rule/article citations
+    • If documents contain SOME procedural information, use that as primary source and supplement with training knowledge while clearly marking the distinction
+    • If the provided documents do NOT contain information about the specific procedure, AND you have verified that NONE of the source documents mention the procedure or rules, ONLY THEN state: "The provided documents don't contain information about [specific procedure], but according to procedural law, I can provide the following guidance:"
+    • ALWAYS prioritize document-based procedural guidance over training knowledge when documents are available
+    • Cite specific document sections, rules, or page references when using document content
+    • IMPORTANT: If you see ANY procedural documents in the sources, assume they contain relevant information and guide confidently
+
     CONSTITUTIONAL PROCEDURAL FRAMEWORK:
     1. CONSTITUTIONAL PROCEDURES: Constitutional remedies (Articles 32, 226, 227)
     2. FUNDAMENTAL RIGHTS ENFORCEMENT: Writ jurisdiction and procedures
@@ -687,6 +1120,9 @@ class UltimateLegalAssistant:
     DETAILED CONSTITUTIONAL PROCEDURAL GUIDANCE:
     """
             }
+            
+
+
 
             # Enhanced citation patterns for comprehensive Indian legal system
             self.citation_patterns = {
@@ -905,12 +1341,16 @@ class UltimateLegalAssistant:
         """Get optimal chunking configuration based on document type and size"""
         
         # Constitutional documents (like your 869KB Constitution)
-        if document_type == 'constitutional' and document_size > 500000:
+        if document_type == "constitutional" and filesize > 500000:
             return {
-                'chunk_size': 2500,    # Larger chunks for complete articles
-                'chunk_overlap': 200,  # Higher overlap for cross-references
-                'splitter': self.constitutional_splitter
+                'strategy': 'hi_res',  # ← Use hi_res for better structure detection
+                'chunking_strategy': 'by_title',
+                'max_characters': self.processing_config['max_chunk_size'],
+                'combine_under_n_chars': 300,  # ← SMALLER! Don't merge short articles
+                'new_after_n_chars': 1500,     # ← SMALLER! Split sooner
+                'overlap': 150                  # ← GOOD overlap
             }
+
         # Regular constitutional documents
         elif document_type == 'constitutional':
             return {
@@ -1712,7 +2152,7 @@ class UltimateLegalAssistant:
                             'is_constitutional_schedule': is_legal_schedule,
                             'page_number': pg,
                             'section_tag': section_tag,
-                            'source_file': os.path.basename(file_path),
+                            'sourcefile': os.path.basename(file_path),
                             'file_hash': file_hash,
                             'extraction_confidence': 0.9,
                             'estimated_tokens': len(content_str) // 4,
@@ -1758,7 +2198,7 @@ class UltimateLegalAssistant:
                                 'legal_complexity': chunk_analysis['complexity_score'],
                                 'page_number': pg,
                                 'section_tag': section_tag,
-                                'source_file': os.path.basename(file_path),
+                                'sourcefile': os.path.basename(file_path),
                                 'file_hash': file_hash,
                                 'char_count': len(s),
                                 'estimated_tokens': len(s) // 4,
@@ -1772,13 +2212,13 @@ class UltimateLegalAssistant:
                     # Enhanced citation extraction with constitutional focus
                     citations = self.extract_citations(content_str)
                     for c in citations:
-                        c['source_file'] = os.path.basename(file_path)
+                        c['sourcefile'] = os.path.basename(file_path)
                         c['file_hash'] = file_hash
                         c['parent_section'] = section_tag
                         c['document_context'] = document_type
                         results['citations'].append(c)
 
-                # Enhanced image processing (your existing code preserved)
+                # Enhanced image processing 
                 if hasattr(el, 'metadata') and hasattr(el.metadata, 'orig_elements'):
                     for sub in el.metadata.orig_elements:
                         if hasattr(sub, 'metadata') and hasattr(sub.metadata, 'image_base64'):
@@ -1794,7 +2234,7 @@ class UltimateLegalAssistant:
                                     'metadata': {
                                         'type': 'image',
                                         'page_number': pg,
-                                        'source_file': os.path.basename(file_path),
+                                        'sourcefile': os.path.basename(file_path),
                                         'file_hash': file_hash,
                                         'extraction_method': 'embedded_in_text',
                                         'size_bytes': len(b64) * 3 // 4,
@@ -2183,118 +2623,84 @@ class UltimateLegalAssistant:
             
             summaries = []
             
-            # 1. TRY GROQ FIRST (Primary method for excellent responses)
-            if hasattr(self, 'groq_client') and self.groq_client:
-                try:
-                    logger.info(f"🤖 Groq processing {content_type} content ({len(content)} chars)")
+            # 1. USE API MANAGER FOR DOCUMENT SUMMARIZATION (3-tier fallback)
+            try:
+                logger.info(f"🤖 API Manager processing {content_type} content ({len(content)} chars)")
+                
+                # Rate limiting: Add 3-second delay between requests
+                time.sleep(3)  # Wait 3 seconds between API calls
+                
+                # FIXED: Use API manager's generate_summary method for 3-tier fallback
+                summary, model_used = self.api_manager.generate_summary(base_prompt)
+                
+                if summary and len(summary) > 50:  # Validate summary quality
+                    confidence = self._calculate_legal_summary_confidence(summary, legal_context)
                     
-                    # Rate limiting: Add 3-second delay between requests
-                    time.sleep(3)  # Wait 3 seconds between API calls
+                    summaries.append({
+                        'text': summary,
+                        'model': model_used,  # Will be 'groq_llama_3.3', 'gemini_key_1', or 'gemini_key_2'
+                        'confidence': confidence,
+                        'tokens': len(summary.split()),
+                        'legal_quality_score': self._assess_legal_summary_quality(summary),
+                        'constitutional_focus': legal_context.get('is_constitutional', False)
+                    })
                     
-                    response = self.groq_client.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": base_prompt}],
-                        temperature=0.05,
-                        max_tokens=2500,
-                        top_p=0.9
-                    )
+                    # Track successful API usage
+                    if hasattr(self, 'metrics') and 'api_calls' in self.metrics:
+                        self.metrics['api_calls']['successful_generation'] = self.metrics['api_calls'].get('successful_generation', 0) + 1
+                    
+                    logger.info(f"✅ API Manager summary generated: {len(summary)} chars, confidence: {confidence:.2f}, model: {model_used}")
+                    
+            except Exception as e:
+                logger.warning(f"❌ API Manager summarization failed: {e}")
+                if hasattr(self, 'metrics') and 'error_tracking' in self.metrics:
+                    self.metrics['error_tracking']['api_errors'] = self.metrics['error_tracking'].get('api_errors', 0) + 1
 
-                    
-                    if response.choices and hasattr(response.choices[0], 'message') and response.choices[0].message.content:
-                        summary = response.choices[0].message.content.strip()
-                        
-                        if summary and len(summary) > 50:  # Validate summary quality
-                            confidence = self._calculate_legal_summary_confidence(summary, legal_context)
-                            
-                            summaries.append({
-                                'text': summary,
-                                'model': 'groq_llama',
-                                'confidence': confidence,
-                                'tokens': len(summary.split()),
-                                'legal_quality_score': self._assess_legal_summary_quality(summary),
-                                'constitutional_focus': legal_context.get('is_constitutional', False)
-                            })
-                            
-                            # Track successful Groq usage
-                            if hasattr(self, 'metrics') and 'api_calls' in self.metrics:
-                                self.metrics['api_calls']['groq_generation'] = self.metrics['api_calls'].get('groq_generation', 0) + 1
-                            
-                            logger.info(f"✅ Groq legal summary generated: {len(summary)} chars, confidence: {confidence:.2f}")
-                            
-                except Exception as e:
-                    logger.warning(f"❌ Groq legal summarization failed: {e}")
-                    if hasattr(self, 'metrics') and 'error_tracking' in self.metrics:
-                        self.metrics['error_tracking']['api_errors'] = self.metrics['error_tracking'].get('api_errors', 0) + 1
-
-            # 2. FALLBACK TO GEMINI if Groq failed or unavailable
+            # 2. EMERGENCY FALLBACK - Direct content if all APIs failed
             if not summaries:
-                try:
-                    logger.info(f"🔄 Fallback to Gemini for {content_type} content")
-                    
-                    model = self.gemini_flash
-                    response = model.generate_content(base_prompt)
-                    summary = response.text.strip() if response.text else "Summary unavailable"
-                    
-                    if summary and len(summary) > 50:
-                        confidence = self._calculate_legal_summary_confidence(summary, legal_context, model_type='gemini')
-                        
-                        summaries.append({
-                            'text': summary,
-                            'model': 'gemini_flash_2.0',
-                            'confidence': confidence,
-                            'tokens': len(summary.split()),
-                            'legal_quality_score': self._assess_legal_summary_quality(summary),
-                            'constitutional_focus': legal_context.get('is_constitutional', False)
-                        })
-                        
-                        logger.info(f"✅ Gemini fallback summary generated: {len(summary)} chars")
-                        
-                except Exception as e:
-                    logger.warning(f"❌ Gemini legal summarization failed: {e}")
-
-            # 3. Select best summary
-            if summaries:
-                best_summary = self._select_best_legal_summary(summaries, legal_context)
-                
-                processing_time = time.time() - start_time
-                
-                return {
-                    'summary': best_summary['text'],
-                    'metadata': {
-                        'model_used': best_summary['model'],
-                        'confidence': best_summary['confidence'],
-                        'token_count': best_summary['tokens'],
-                        'content_type': content_type,
-                        'legal_quality_score': best_summary.get('legal_quality_score', 0.5),
-                        'constitutional_focus': legal_context.get('is_constitutional', False),
-                        'processing_time_ms': processing_time * 1000,
-                        'timestamp': datetime.now().isoformat()
-                    }
-                }
-            else:
-                # Final fallback - direct content
                 logger.warning("⚠️ All AI summarization failed, using direct content")
                 direct_summary = content[:1000] + "..." if len(content) > 1000 else content
                 
-                return {
-                    'summary': f"Enhanced legal summary for {content_type}: {direct_summary}",
-                    'metadata': {
-                        'model_used': 'fallback',
-                        'confidence': 0.5,
-                        'content_type': content_type,
-                        'error': "All legal summarization models failed"
-                    }
+                summaries.append({
+                    'text': f"Enhanced legal summary for {content_type}: {direct_summary}",
+                    'model': 'fallback_direct',
+                    'confidence': 0.3,
+                    'tokens': len(direct_summary.split()),
+                    'legal_quality_score': 0.2,
+                    'constitutional_focus': legal_context.get('is_constitutional', False)
+                })
+
+            # 3. Select best summary
+            best_summary = self._select_best_legal_summary(summaries, legal_context)
+            
+            processing_time = time.time() - start_time
+            
+            return {
+                'summary': best_summary['text'],
+                'metadata': {
+                    'model_used': best_summary['model'],
+                    'confidence': best_summary['confidence'],
+                    'token_count': best_summary['tokens'],
+                    'content_type': content_type,
+                    'legal_quality_score': best_summary.get('legal_quality_score', 0.5),
+                    'constitutional_focus': legal_context.get('is_constitutional', False),
+                    'processing_time_ms': processing_time * 1000,
+                    'timestamp': datetime.now().isoformat(),
+                    'api_fallback_used': best_summary['model']  # Track which tier was used
                 }
-                
+            }
+                    
         except Exception as e:
             logger.error(f"❌ Error in ultimate legal summarization: {e}")
             return {
                 'summary': f"Unable to generate legal summary for {content_type}",
                 'metadata': {
                     'error': str(e),
-                    'legal_processing_failed': True
+                    'legal_processing_failed': True,
+                    'model_used': 'error_fallback'
                 }
             }
+
 
     def _extract_legal_context_from_item(self, item: Dict) -> Dict:
         """Extract legal context from content item"""
@@ -2566,7 +2972,7 @@ class UltimateLegalAssistant:
             if not summaries:
                 return {'stored': 0, 'errors': 0, 'legal_analysis': {'constitutional_content': False}}
 
-            # FIX: Add safety check for retriever existence
+            # Added safety check for retriever existence
             retriever = self.retrievers.get(content_type)
             if not retriever:
                 logger.warning(f"⚖️ No retriever found for content type: {content_type}")
@@ -2606,6 +3012,12 @@ class UltimateLegalAssistant:
             vector_ids: List[str] = []
             parent_records: Dict[str, Any] = {}
 
+            # 🔍 DIAGNOSTIC: Log chunk processing start
+            logger.info(f"\n{'='*60}")
+            logger.info(f"🔬 STORAGE DIAGNOSTIC [{content_type}]")
+            logger.info(f"{'='*60}")
+            logger.info(f"Processing {len(summaries)} chunks...")
+
             for i, summary_data in enumerate(summaries):
                 try:
                     # FIX: Add better error handling for original data access
@@ -2619,6 +3031,16 @@ class UltimateLegalAssistant:
                         content_str = str(original.page_content)
                     else:
                         content_str = str(original)
+
+                    # 🔍 DIAGNOSTIC: Log first 3 chunks with metadata
+                    if i < 3:
+                        logger.info(f"\n--- Chunk {i} ---")
+                        logger.info(f"Content preview: {content_str[:150]}...")
+                        logger.info(f"Metadata keys: {list(orig_meta.keys())}")
+                        logger.info(f"sourcefile: {orig_meta.get('sourcefile', 'MISSING')}")
+                        logger.info(f"sourcefile: {orig_meta.get('sourcefile', 'MISSING')}")
+                        logger.info(f"page_number: {orig_meta.get('page_number', 'MISSING')}")
+                        logger.info(f"section_tag: {orig_meta.get('section_tag', 'MISSING')}")
 
                     # Your existing parent_id logic preserved
                     parent_id = original.get('parent_id') if isinstance(original, dict) else None
@@ -2745,16 +3167,57 @@ class UltimateLegalAssistant:
 
                 except Exception as e:
                     logger.error(f"⚖️ Error preparing legal document {i}: {e}")
+                    logger.error(f"   Traceback: {traceback.format_exc()}")
                     storage_stats['errors'] += 1
                     continue  # Continue with next item instead of failing completely
+
+            # 🔍 DIAGNOSTIC: Log vector creation summary
+            logger.info(f"\n{'='*60}")
+            logger.info(f"✅ VECTOR CREATION COMPLETE")
+            logger.info(f"{'='*60}")
+            logger.info(f"Total vectors created: {len(vector_docs)}")
+            logger.info(f"Total vector IDs: {len(vector_ids)}")
+            logger.info(f"Sample vector IDs: {vector_ids[:5]}")
+            logger.info(f"Total parent records: {len(parent_records)}")
+            logger.info(f"Sample parent IDs: {list(parent_records.keys())[:3]}")
+            
+            if vector_docs:
+                logger.info(f"\n--- First Vector Metadata Check ---")
+                first_meta = vector_docs[0].metadata
+                logger.info(f"Metadata keys: {list(first_meta.keys())}")
+                logger.info(f"sourcefile present: {'sourcefile' in first_meta}")
+                logger.info(f"sourcefile present: {'sourcefile' in first_meta}")
+                logger.info(f"page_number present: {'page_number' in first_meta}")
+                logger.info(f"id_key ({self.id_key}) present: {self.id_key in first_meta}")
+                logger.info(f"content_type: {first_meta.get('content_type', 'MISSING')}")
 
             # MOVED OUTSIDE FOR LOOP: Enhanced vector storage with legal intelligence
             try:
                 if vector_docs and vector_ids:  # Only add if we have documents and IDs
+                    logger.info(f"\n🔵 Adding {len(vector_docs)} vectors to ChromaDB...")
                     vectorstore.add_documents(vector_docs, ids=vector_ids)
                     storage_stats['stored'] += len(vector_docs)
+                    logger.info(f"✅ Successfully added {len(vector_docs)} vectors to ChromaDB")
+                    
+                    # 🔍 DIAGNOSTIC: Verify vectors were actually stored
+                    try:
+                        stored_data = vectorstore.get(limit=5)
+                        logger.info(f"\n--- ChromaDB Verification ---")
+                        logger.info(f"Stored IDs count: {len(stored_data.get('ids', []))}")
+                        logger.info(f"Sample stored IDs: {stored_data.get('ids', [])[:3]}")
+                        logger.info(f"Embeddings present: {len(stored_data.get('embeddings', [])) > 0}")
+                        if stored_data.get('metadatas'):
+                            first_stored_meta = stored_data['metadatas'][0]
+                            logger.info(f"First stored metadata keys: {list(first_stored_meta.keys())}")
+                            logger.info(f"First stored sourcefile: {first_stored_meta.get('sourcefile', 'MISSING')}")
+                            logger.info(f"First stored page_number: {first_stored_meta.get('page_number', 'MISSING')}")
+                    except Exception as verify_err:
+                        logger.warning(f"⚠️ Could not verify stored vectors: {verify_err}")
+                    
                 else:
-                    logger.warning(f"No valid documents to store for {content_type}")
+                    logger.warning(f"❌ No valid documents to store for {content_type}")
+                    logger.warning(f"   vector_docs length: {len(vector_docs)}")
+                    logger.warning(f"   vector_ids length: {len(vector_ids)}")
                     return {
                         'stored': 0, 
                         'errors': storage_stats['errors'],
@@ -2763,6 +3226,7 @@ class UltimateLegalAssistant:
                     }
             except Exception as e:
                 logger.warning(f"⚖️ Legal vector add failed (will retry via delete+add): {e}")
+                logger.warning(f"   Traceback: {traceback.format_exc()}")
                 try:
                     # Check which IDs already exist for deduplication tracking
                     if hasattr(self, '_check_existing_vectors'):
@@ -2770,23 +3234,84 @@ class UltimateLegalAssistant:
                         storage_stats['processing_metrics']['deduplication_hits'] = len(existing_vectors)
                     
                     if vector_ids:
+                        logger.info(f"🔄 Deleting {len(vector_ids)} existing vectors...")
                         vectorstore.delete(ids=vector_ids)
                     if vector_docs:
+                        logger.info(f"🔄 Re-adding {len(vector_docs)} vectors...")
                         vectorstore.add_documents(vector_docs, ids=vector_ids)
                     storage_stats['stored'] += len(vector_docs)
+                    logger.info(f"✅ Successfully re-added {len(vector_docs)} vectors")
                 except Exception as ee:
-                    logger.error(f"⚖️ Legal vector delete+add failed: {ee}")
+                    logger.error(f"❌ Legal vector delete+add failed: {ee}")
+                    logger.error(f"   Traceback: {traceback.format_exc()}")
                     storage_stats['errors'] += len(vector_docs)
 
-            # MOVED OUTSIDE FOR LOOP: Docstore operations
+            # FIXED: Store parent documents WITH metadata in docstore
             if parent_records:
-                # FIX: Extract just the content for docstore, not the dict wrapper
-                parent_docs_for_docstore = [
-                    (parent_id, record['content']) 
-                    for parent_id, record in parent_records.items()
-                ]
+                logger.info(f"\n🔵 Storing {len(parent_records)} parent documents in docstore...")
+                
+                parent_docs_for_docstore = []
+                for parent_id, record in parent_records.items():
+                    content = record['content']
+                    metadata = record['metadata']
+                    
+                    # Create Document object with full metadata
+                    if hasattr(content, 'page_content'):
+                        # Content is already a Document
+                        parent_doc = Document(
+                            page_content=content.page_content,
+                            metadata=metadata  # ← This is the critical fix!
+                        )
+                    elif isinstance(content, dict):
+                        # Content is a dictionary
+                        content_text = str(content.get('content', content.get('page_content', '')))
+                        parent_doc = Document(
+                            page_content=content_text,
+                            metadata=metadata
+                        )
+                    else:
+                        # Content is a string or other type
+                        parent_doc = Document(
+                            page_content=str(content),
+                            metadata=metadata
+                        )
+                    
+                    parent_docs_for_docstore.append((parent_id, parent_doc))
+                
+                # 🔍 DIAGNOSTIC: Log first parent before storing
+                if parent_docs_for_docstore:
+                    first_parent_id, first_parent_doc = parent_docs_for_docstore[0]
+                    logger.info(f"\n--- First Parent Document Check ---")
+                    logger.info(f"Parent ID: {first_parent_id}")
+                    logger.info(f"Parent metadata keys: {list(first_parent_doc.metadata.keys())}")
+                    logger.info(f"Parent sourcefile: {first_parent_doc.metadata.get('sourcefile', 'MISSING')}")
+                    logger.info(f"Parent sourcefile: {first_parent_doc.metadata.get('sourcefile', 'MISSING')}")
+                    logger.info(f"Parent page_number: {first_parent_doc.metadata.get('page_number', 'MISSING')}")
+                    logger.info(f"Parent id_key ({self.id_key}): {first_parent_doc.metadata.get(self.id_key, 'MISSING')}")
+                    logger.info(f"Parent content length: {len(first_parent_doc.page_content)}")
+                
                 docstore.mset(parent_docs_for_docstore)
-                logger.info(f"📚 Stored {len(parent_docs_for_docstore)} parent documents in docstore")
+                logger.info(f"✅ Stored {len(parent_docs_for_docstore)} parent documents WITH METADATA in docstore")
+                
+                # 🔍 DIAGNOSTIC: Verify parents were actually stored
+                try:
+                    stored_keys = list(docstore.yield_keys())
+                    logger.info(f"\n--- Docstore Verification ---")
+                    logger.info(f"Total parent keys in docstore: {len(stored_keys)}")
+                    logger.info(f"Sample parent keys: {stored_keys[:3]}")
+                    
+                    # Try to retrieve first parent
+                    if stored_keys:
+                        test_parent = docstore.mget([stored_keys[0]])[0]
+                        if test_parent:
+                            logger.info(f"✅ Successfully retrieved parent {stored_keys[0]}")
+                            logger.info(f"   Retrieved parent metadata: {list(test_parent.metadata.keys())}")
+                            logger.info(f"   Retrieved sourcefile: {test_parent.metadata.get('sourcefile', 'MISSING')}")
+                            logger.info(f"   Retrieved page_number: {test_parent.metadata.get('page_number', 'MISSING')}")
+                        else:
+                            logger.warning(f"⚠️ Retrieved None for parent {stored_keys[0]}")
+                except Exception as verify_err:
+                    logger.warning(f"⚠️ Could not verify docstore: {verify_err}")
 
             # MOVED OUTSIDE FOR LOOP: Persistence operations
             self.persist_chroma()
@@ -2799,11 +3324,20 @@ class UltimateLegalAssistant:
             if hasattr(self.metrics, 'content_statistics'):
                 self._update_content_statistics(storage_stats)
 
-            logger.info(f"🏛️ Stored legal vectors: {storage_stats['stored']} | Constitutional: {storage_stats['legal_analysis']['constitutional_content']} | Cross-refs: {storage_stats['processing_metrics']['cross_reference_vectors']}")
+            logger.info(f"\n{'='*60}")
+            logger.info(f"🏛️ STORAGE COMPLETE [{content_type}]")
+            logger.info(f"{'='*60}")
+            logger.info(f"Stored legal vectors: {storage_stats['stored']}")
+            logger.info(f"Constitutional: {storage_stats['legal_analysis']['constitutional_content']}")
+            logger.info(f"Cross-refs: {storage_stats['processing_metrics']['cross_reference_vectors']}")
+            logger.info(f"Processing time: {processing_time:.2f}s")
+            logger.info(f"Errors: {storage_stats['errors']}")
+            
             return storage_stats
 
         except Exception as e:  # THIS IS NOW PROPERLY ALIGNED WITH THE OUTER TRY
             logger.error(f"❌ Error storing {content_type} legal documents: {e}")
+            logger.error(f"   Traceback: {traceback.format_exc()}")
             return {
                 'stored': 0, 
                 'errors': len(summaries),
@@ -2828,9 +3362,85 @@ class UltimateLegalAssistant:
         return cleaned
 
     def extract_sources_with_legal_authority(self, parsed_docs: Dict, question: str, query_analysis: Dict) -> List[Dict]:
-        """Extract sources with legal authority ranking for constitutional queries"""
+        """Extract sources with INTELLIGENT RE-RANKING for article-specific queries"""
         sources = []
         
+        def extract_article_numbers(content: str) -> List[int]:
+            """PRODUCTION REGEX - Works for full constitution (Articles 1-395)"""
+            if not content:
+                return []
+            
+            articles = set()
+            
+            # Pattern 1: Standard "Article 15"
+            matches = re.findall(r'\b[Aa]rticle\s+(\d+[A-Z]?)', content)
+            for match in matches:
+                num = int(re.sub(r'[A-Z]', '', match))
+                if 1 <= num <= 395:
+                    articles.add(num)
+            
+            # Pattern 2: Abbreviated "Art. 15" or "Arts. 15"
+            matches = re.findall(r'\b[Aa]rts?\.\s*(\d+)', content)
+            articles.update(int(a) for a in matches if a.isdigit() and 1 <= int(a) <= 395)
+            
+            # Pattern 3: Range "Arts. 33—35"
+            range_matches = re.findall(r'\b[Aa]rts?\.\s*(\d+)[—\-–](\d+)', content)
+            for start, end in range_matches:
+                for num in range(int(start), min(int(end), 395) + 1):
+                    if 1 <= num <= 395:
+                        articles.add(num)
+            
+            # Pattern 4: Article body "15. The State..." WITH optional quotes
+            matches = re.findall(r'(?:^|\n)\s*(\d+)\.\s*["\']?[\(\[A-Z]', content)
+            articles.update(int(a) for a in matches if a.isdigit() and 1 <= int(a) <= 395)
+            
+            # Pattern 5: Sub-clause "22. (1)"
+            matches = re.findall(r'(?:^|\n)\s*(\d+)\.\s*\(', content)
+            articles.update(int(a) for a in matches if a.isdigit() and 1 <= int(a) <= 395)
+            
+            # Pattern 6: Bracketed "[22]"
+            matches = re.findall(r'\[(\d+[A-Z]?)\]', content)
+            for match in matches:
+                num = int(re.sub(r'[A-Z]', '', match))
+                if 1 <= num <= 395:
+                    articles.add(num)
+            
+            # Pattern 7: Clause references "clause (2) of article 29"
+            matches = re.findall(r'clause\s*\(\d+\)\s*of\s*article\s+(\d+)', content, re.IGNORECASE)
+            articles.update(int(a) for a in matches if a.isdigit() and 1 <= int(a) <= 395)
+            
+            # Pattern 8: Footer citations "(Part III.—Art. 22.)"
+            matches = re.findall(r'\(Part\s+[IVX]+.*?[Aa]rts?\.\s*(\d+)', content)
+            articles.update(int(a) for a in matches if a.isdigit() and 1 <= int(a) <= 395)
+            
+            return sorted(list(articles))
+        
+        # NEW FUNCTION: Check if article appears early in content
+        def get_article_position_score(content: str, article_nums: List[int]) -> float:
+            """Higher score if article appears in first 30% of content"""
+            if not article_nums or not content:
+                return 0.0
+            
+            content_lower = content.lower()
+            early_cutoff = len(content) // 3  # First 30%
+            
+            for article in article_nums:
+                # Check multiple formats
+                patterns = [
+                    f"article {article}",
+                    f"art. {article}",
+                    f"\n{article}.",  # Article body format
+                ]
+                
+                for pattern in patterns:
+                    pos = content_lower.find(pattern)
+                    if 0 <= pos < early_cutoff:
+                        return 1.0  # Found in first 30%
+                    elif pos > 0:
+                        return 0.5  # Found later
+            
+            return 0.0
+
         try:
             # Process text sources
             if parsed_docs.get("texts"):
@@ -2838,12 +3448,45 @@ class UltimateLegalAssistant:
                     content = doc.page_content if hasattr(doc, 'page_content') else str(doc)
                     metadata = doc.metadata if hasattr(doc, 'metadata') else {}
                     
+                    document_name = (
+                        metadata.get('source_file') or
+                        metadata.get('sourcefile') or
+                        metadata.get('document_name') or 
+                        'Constitutional Document'
+                    )
+                    
+                    page_number = (
+                        metadata.get('page_number') or
+                        metadata.get('pagenumber') or
+                        metadata.get('page') or 
+                        'N/A'
+                    )
+                    
+                    # Extract article numbers from FULL content
+                    articles_mentioned = extract_article_numbers(content)
+                    
+                    # Calculate relevance score based on article matches
+                    query_articles = extract_article_numbers(question)
+                    article_match_score = 0.0
+                    if query_articles and articles_mentioned:
+                        matched = len(set(query_articles) & set(articles_mentioned))
+                        article_match_score = matched / len(query_articles)
+                    elif not query_articles:
+                        article_match_score = 0.5
+                    
+                    # NEW: Position scoring
+                    position_score = get_article_position_score(content, query_articles)
+                    
                     source = {
                         "content": content[:500] + "..." if len(content) > 500 else content,
+                        "full_content": content,
                         "source_type": "constitutional_text",
                         "authority_level": "high" if query_analysis.get('is_constitutional', False) else "medium",
-                        "document_name": metadata.get('document_name', 'Constitutional Document'),
-                        "page_number": metadata.get('page_number', 'N/A'),
+                        "document_name": document_name,
+                        "page_number": page_number,
+                        "articles_mentioned": articles_mentioned,
+                        "article_match_score": article_match_score,
+                        "position_score": position_score,  # NEW
                         "constitutional_relevance": metadata.get('constitutional_relevance', 0.8)
                     }
                     sources.append(source)
@@ -2854,19 +3497,82 @@ class UltimateLegalAssistant:
                     content = doc.page_content if hasattr(doc, 'page_content') else str(doc)
                     metadata = doc.metadata if hasattr(doc, 'metadata') else {}
                     
+                    document_name = (
+                        metadata.get('source_file') or
+                        metadata.get('sourcefile') or
+                        metadata.get('document_name') or 
+                        'Legal Citation'
+                    )
+                    
+                    articles_mentioned = extract_article_numbers(content)
+                    query_articles = extract_article_numbers(question)
+                    article_match_score = 0.0
+                    if query_articles and articles_mentioned:
+                        matched = len(set(query_articles) & set(articles_mentioned))
+                        article_match_score = matched / len(query_articles)
+                    elif not query_articles:
+                        article_match_score = 0.5
+                    
+                    position_score = get_article_position_score(content, query_articles)
+                    
                     source = {
                         "content": content[:300] + "..." if len(content) > 300 else content,
+                        "full_content": content,
                         "source_type": "legal_citation",
                         "authority_level": "high",
-                        "document_name": metadata.get('document_name', 'Legal Citation'),
+                        "document_name": document_name,
+                        "articles_mentioned": articles_mentioned,
+                        "article_match_score": article_match_score,
+                        "position_score": position_score,  # NEW
                         "citation_type": "constitutional" if query_analysis.get('is_constitutional', False) else "statutory"
                     }
                     sources.append(source)
+            
+            # ============================================================
+            # INTELLIGENT RE-RANKING: Boost exact article matches + position
+            # ============================================================
+            query_articles = extract_article_numbers(question)
+            
+            if query_articles:
+                logger.info(f"🎯 Query asks for articles: {query_articles}")
+                
+                for source in sources:
+                    article_match = source.get('article_match_score', 0.0)
+                    position = source.get('position_score', 0.0)
+                    
+                    # ENHANCED BOOST LOGIC with position:
+                    if article_match == 1.0 and position == 1.0:
+                        # Perfect match + early position → 12x boost
+                        source['composite_score'] = 12.0
+                    elif article_match == 1.0:
+                        # Perfect match → 10x boost
+                        source['composite_score'] = 10.0
+                    elif article_match >= 0.5 and position >= 0.5:
+                        # Partial match + good position → 7x boost
+                        source['composite_score'] = 7.0 + (article_match * 3.0)
+                    elif article_match >= 0.5:
+                        # Partial match → moderate boost
+                        source['composite_score'] = 5.0 + (article_match * 5.0)
+                    else:
+                        # No match or weak match → low score
+                        source['composite_score'] = 0.1
+                
+                # Re-sort by composite score
+                sources.sort(key=lambda x: x.get('composite_score', 0.0), reverse=True)
+                
+                logger.info(f"📊 Top 3: scores={[s.get('composite_score', 0) for s in sources[:3]]}, positions={[s.get('position_score', 0) for s in sources[:3]]}")
+            else:
+                # No specific articles → keep original order
+                sources.sort(key=lambda x: x.get('article_match_score', 0.0), reverse=True)
+            
+            logger.info(f"📊 Extracted {len(sources)} sources, top match: {sources[0].get('article_match_score', 0.0):.2f}" if sources else "📊 No sources")
         
         except Exception as e:
             logger.error(f"Error extracting sources: {e}")
         
-        return sources[:15]  # Limit to 15 most relevant sources
+        return sources[:15]
+
+
     def _calculate_citation_authority_score(self, sources: List) -> float:
         """Calculate overall authority score from sources"""
         if not sources:
@@ -3068,7 +3774,7 @@ class UltimateLegalAssistant:
                 all_files.extend([f for f in os.listdir(documents_dir) if f.lower().endswith(ext)])
             all_files = sorted(set(all_files))
             
-            # Enhanced: Prioritize constitutional documents for processing order
+            # Prioritize constitutional documents for processing order
             constitutional_files = [f for f in all_files if self._is_constitutional_filename(f)]
             other_files = [f for f in all_files if not self._is_constitutional_filename(f)]
             all_files = constitutional_files + other_files  # Process constitutional documents first
@@ -3081,7 +3787,7 @@ class UltimateLegalAssistant:
                     "legal_analysis": {"constitutional_documents": 0}
                 }
 
-            # Enhanced manifest with legal document intelligence (your existing logic preserved)
+            # Enhanced manifest with legal document intelligence
             manifest = self.processing_stats.get("document_index", {})
             files_to_process = []
 
@@ -3106,7 +3812,7 @@ class UltimateLegalAssistant:
             for filename in all_files:
                 fp = os.path.join(documents_dir, filename)
                 
-                # Enhanced: Skip if already processed (your existing check preserved)
+                #Skip if already processed (your existing check preserved)
                 if hasattr(self, 'check_document_already_processed') and self.check_document_already_processed(fp):
                     processing_results['files_skipped'].append({'file': filename, 'reason': 'already_processed'})
                     continue
@@ -3115,7 +3821,7 @@ class UltimateLegalAssistant:
                 mtime = os.path.getmtime(fp)
                 prev = manifest.get(filename)
                 
-                # Enhanced: Also check for legal document type changes
+                # Also check for legal document type changes
                 if not prev or prev.get("hash") != fhash or prev.get("last_modified") != mtime:
                     # Detect document type for enhanced processing
                     doc_type = self._detect_legal_document_type(filename, fp)
@@ -3134,7 +3840,7 @@ class UltimateLegalAssistant:
 
             logger.info(f"📚 Processing {len(files_to_process)} changed/new legal files with constitutional intelligence...")
 
-            # Enhanced: Process files in batches with legal document intelligence
+            # Process files in batches with legal document intelligence
             for i in range(0, len(files_to_process), batch_size):
                 batch = files_to_process[i:i+batch_size]
                 logger.info(f"⚖️ Processing legal batch {i//batch_size + 1}: {len(batch)} files")
@@ -3154,7 +3860,7 @@ class UltimateLegalAssistant:
                             result['last_modified'] = mtime
                             result['legal_document_type'] = doc_type
                             
-                            # Enhanced: Legal document analysis
+                            #Legal document analysis
                             legal_metrics = self._analyze_processed_document(result, doc_type)
                             result['legal_metrics'] = legal_metrics
                             self._update_legal_processing_stats(processing_results['legal_analysis'], legal_metrics)
@@ -3174,7 +3880,6 @@ class UltimateLegalAssistant:
                             logger.error(f"⚖️ Failed to process legal document {fname}: {e}")
                             processing_results['files_failed'].append({'file': fname, 'error': str(e), 'document_type': doc_type})
 
-                # Your existing aggregation logic preserved
                 for r in batch_results:
                     processing_results['total_content']['texts'].extend(r.get('texts', []))
                     processing_results['total_content']['tables'].extend(r.get('tables', []))
@@ -3242,7 +3947,7 @@ class UltimateLegalAssistant:
 
                 summary_results[ctype] = summaries
 
-            # Enhanced storage phase with legal intelligence (your existing logic preserved)
+            # storage phase with legal intelligence 
             logger.info("🏛️ Storing in ultimate legal vector database with constitutional cross-references...")
             storage_results = {}
 
@@ -3255,7 +3960,7 @@ class UltimateLegalAssistant:
                     )
                     storage_results[ctype] = stats
 
-            # Enhanced final statistics with comprehensive legal analytics
+            #final statistics with comprehensive legal analytics
             end_time = datetime.now()
             total_time = (end_time - start_time).total_seconds()
 
@@ -3277,7 +3982,7 @@ class UltimateLegalAssistant:
                 "storage_results": storage_results,
                 "documents_list": processing_results['files_processed'],
                 "document_index": manifest,
-                # Enhanced: Comprehensive legal analytics
+                # Comprehensive legal analytics
                 "legal_analysis": processing_results['legal_analysis'],
                 "constitutional_completeness": self._assess_constitutional_completeness(processing_results),
                 "legal_document_distribution": self._calculate_document_distribution(processing_results)
@@ -3286,7 +3991,7 @@ class UltimateLegalAssistant:
             self.processing_stats.update(final_stats)
             self.documents_processed = True
 
-            # Enhanced: Save comprehensive legal results
+            # Save comprehensive legal results
             comprehensive_results = {
                 "processing_summary": final_stats,
                 "detailed_results": processing_results,
@@ -3304,7 +4009,7 @@ class UltimateLegalAssistant:
             with open("./ultimate_legal_processing_results.json", "w", encoding="utf-8") as f:
                 json.dump(comprehensive_results, f, indent=2, ensure_ascii=False)
 
-            # Your existing persistence preserved
+            # persistence preserved
             if hasattr(self, 'save_persistent_state'):
                 self.save_persistent_state()
             self.persist_chroma()
@@ -3428,7 +4133,7 @@ class UltimateLegalAssistant:
             'constitutional_relevance': metadata.get('constitutional_relevance', 0.1),
             'contains_articles': metadata.get('contains_articles', False),
             'contains_sections': metadata.get('contains_sections', False),
-            'document_source': metadata.get('source_file', 'unknown'),
+            'document_source': metadata.get('sourcefile', 'unknown'),
             'document_type': metadata.get('legal_content_type', 'general_legal'),
             'is_constitutional': metadata.get('contains_articles', False),
             'is_statutory': metadata.get('contains_sections', False),
@@ -3649,352 +4354,327 @@ class UltimateLegalAssistant:
 
 
     def ultimate_query_processor(
-        self,
-        question: str,
-        prompt_template_key: str = 'general_analysis',
-        max_results: int = 10,
-        include_citations: bool = True,
-        confidence_threshold: float = 0.7,
-        include_sources: bool = True,
-    ) -> Dict[str, Any]:
-        """Ultimate query processing optimized for Indian Constitutional and legal documents"""
-        try:
-            query_start = time.time()
-            self.query_metrics['total_queries'] += 1
-
-            if not self.documents_processed:
-                return {
-                    "error": "No legal documents processed",
-                    "response": "VirLaw AI: Please process legal documents first using the document processing endpoint.",
-                    "sources": [],
-                    "metadata": {
-                        "documents_processed": False,
-                        "query_timestamp": datetime.now().isoformat(),
-                        "constitutional_analysis": {"status": "no_documents"}
-                    }
-                }
-
-            # Enhanced: Analyze query for legal intelligence
-            query_analysis = self._analyze_legal_query(question, prompt_template_key)
-            logger.info(f"🏛️ Ultimate legal query processing: {question[:100]}... | Type: {query_analysis['query_type']} | Constitutional: {query_analysis.get('is_constitutional', False)}")
-
-            # FIX: Get optimal template based on frontend query type and content analysis
-            final_template_key = self.get_optimal_template(prompt_template_key, question)
-
-            # Enhanced multi-modal retrieval with constitutional intelligence
-            retrieval_start = time.time()
+            self,
+            question: str,
+            prompt_template_key: str = 'general_analysis',
+            max_results: int = 10,
+            include_citations: bool = True,
+            confidence_threshold: float = 0.7,
+            include_sources: bool = True,
+        ) -> Dict[str, Any]:
+            """Ultimate query processing optimized for Indian Constitutional and legal documents"""
             try:
-                # Enhanced: Adaptive retrieval based on query type
-                retrieval_config = self._get_optimal_retrieval_config(query_analysis, max_results)
-                
-                # FIXED: Configure k per retriever with constitutional optimization
-                self.retrievers['texts'].search_kwargs['k'] = retrieval_config['text_k']
-                self.retrievers['tables'].search_kwargs['k'] = retrieval_config['tables_k']
-                self.retrievers['images'].search_kwargs['k'] = retrieval_config['images_k']
-                self.retrievers['citations'].search_kwargs['k'] = retrieval_config['citations_k']
+                query_start = time.time()
+                self.query_metrics['total_queries'] += 1
 
-                # Enhanced query expansion for constitutional content
-                enhanced_query = self._enhance_constitutional_query(question, query_analysis)
-
-                # ERROR-HANDLED RETRIEVAL
-                def safe_retrieve(retriever, query, content_type):
-                    try:
-                        return retriever.invoke(query)
-                    except Exception as e:
-                        if "contigious 2D array" in str(e) or "ef or M is too small" in str(e):
-                            logger.warning(f"🔧 MMR failed for {content_type}, trying different fallback approaches")
-                            
-                            # Try approach 1: search_kwargs['search_type']
-                            try:
-                                if hasattr(retriever, 'search_kwargs') and 'search_type' in retriever.search_kwargs:
-                                    logger.info(f"🔧 Trying search_kwargs approach for {content_type}")
-                                    original_kwargs = retriever.search_kwargs.copy()
-                                    retriever.search_kwargs['search_type'] = 'similarity'
-                                    result = retriever.invoke(query)
-                                    retriever.search_kwargs = original_kwargs
-                                    return result
-                            except Exception:
-                                if hasattr(retriever, 'search_kwargs'):
-                                    retriever.search_kwargs = retriever.search_kwargs.copy()  # Reset just in case
-                            
-                            # Try approach 2: direct search_type property
-                            try:
-                                if hasattr(retriever, 'search_type'):
-                                    logger.info(f"🔧 Trying direct search_type approach for {content_type}")
-                                    original_search_type = retriever.search_type
-                                    retriever.search_type = 'similarity'
-                                    result = retriever.invoke(query)
-                                    retriever.search_type = original_search_type
-                                    return result
-                            except Exception:
-                                if hasattr(retriever, 'search_type'):
-                                    retriever.search_type = getattr(retriever, '_original_search_type', 'mmr')  # Reset
-                            
-                            # If both approaches fail, return empty
-                            logger.error(f"🔧 All fallback approaches failed for {content_type}")
-                            return []
-                        else:
-                            logger.error(f"🔧 Non-MMR retrieval error for {content_type}: {e}")
-                            return []
-
-
-
-                # Safe retrieval calls
-                text_docs = safe_retrieve(self.retrievers['texts'], enhanced_query, 'texts')
-                table_docs = safe_retrieve(self.retrievers['tables'], question, 'tables')
-                image_docs = safe_retrieve(self.retrievers['images'], question, 'images')
-                citation_docs = safe_retrieve(self.retrievers['citations'], enhanced_query, 'citations') if include_citations else []
-
-                # Enhanced: Constitutional cross-reference retrieval
-                if query_analysis.get('is_constitutional', False) and query_analysis['constitutional_articles']:
-                    try:
-                        cross_ref_docs = self._retrieve_constitutional_cross_references(
-                            query_analysis['constitutional_articles'], question
-                        )
-                        text_docs.extend(cross_ref_docs)
-                    except Exception as e:
-                        logger.warning(f"🔧 Constitutional cross-reference failed: {e}")
-
-                all_docs = text_docs + table_docs + image_docs + citation_docs
-                retrieval_time = time.time() - retrieval_start
-
-                self.metrics['processing_times']['vector_search'].append(retrieval_time)
-                logger.info(f"⚖️ Enhanced retrieval: {len(text_docs)} texts, {len(table_docs)} tables, "
-                            f"{len(image_docs)} images, {len(citation_docs)} citations | Constitutional context: {query_analysis['constitutional_relevance']}")
-
-            except Exception as e:
-                logger.error(f"⚖️ Legal document retrieval error: {e}")
-                self.metrics['error_tracking']['retrieval_errors'] += 1
-                return {
-                    "error": "Legal document retrieval failed",
-                    "response": "VirLaw AI: Unable to retrieve relevant legal information. Please try rephrasing your query with specific legal terminology.",
-                    "sources": [],
-                    "metadata": {
-                        "retrieval_error": str(e),
-                        "legal_suggestion": "Try using specific Article numbers, case names, or legal concepts"
-                    }
-                }
-
-            # Enhanced: Parse and organize with legal intelligence
-            parsed_docs = self.parse_retrieved_docs_ultimate(all_docs, legal_context=query_analysis)
-
-            # Safety check for parsed_docs
-            if not isinstance(parsed_docs, dict):
-                logger.warning("❌ Invalid parsed_docs format, creating empty structure")
-                parsed_docs = {
-                    "texts": [],
-                    "images": [],
-                    "citations": [],
-                    "metadata": [],
-                    "confidence_scores": []
-                }
-
-            # REMOVE THE STORAGE OPERATIONS - DON'T STORE DURING QUERY!
-            texts = parsed_docs.get("texts", []) if parsed_docs else []
-            
-            # Enhanced: No texts handling with legal guidance
-            if not texts:
-                return {
-                    "response": self._generate_no_results_legal_response(question, query_analysis),
-                    "sources": [],
-                    "metadata": {
-                        "documents_found": 0,
-                        "query_timestamp": datetime.now().isoformat(),
-                        "legal_analysis": query_analysis,
-                        "suggestions": self._generate_legal_query_suggestions(question, query_analysis)
-                    },
-                    "error": None
-                }
-
-            citations = parsed_docs.get("citations", [])
-            # DON'T STORE CITATIONS EITHER - JUST USE THEM
-
-
-            if citations:
-                citation_summaries = [
-                    {
-                        "summary": doc.page_content if hasattr(doc, "page_content") else str(doc),
+                if not self.documents_processed:
+                    return {
+                        "error": "No legal documents processed",
+                        "response": "VirLaw AI: Please process legal documents first using the document processing endpoint.",
+                        "sources": [],
                         "metadata": {
-                            "confidence": 1.0, 
-                            "model_used": "raw",
-                            "legal_authority": self._determine_citation_legal_authority(doc)
+                            "documents_processed": False,
+                            "query_timestamp": datetime.now().isoformat(),
+                            "constitutional_analysis": {"status": "no_documents"}
                         }
                     }
-                    for doc in citations
-                ]
-                citation_stats = self.store_with_advanced_metadata(
-                    summaries=citation_summaries,
-                    originals=citations,
-                    content_type="citations"
-                )
-                logger.info(f"⚖️ Stored legal citation vectors: {citation_stats}")
 
-            # FIXED: Build ultimate legal query prompt with constitutional intelligence - using final_template_key
-            legal_prompt = self.build_ultimate_prompt(parsed_docs, question, final_template_key)
+                # Analyze query for legal intelligence
+                query_analysis = self._analyze_legal_query(question, prompt_template_key)
+                logger.info(f"🏛️ Ultimate legal query processing: {question[:100]}... | Type: {query_analysis['query_type']} | Constitutional: {query_analysis.get('is_constitutional', False)}")
 
-            # Enhanced generation with legal model optimization
-            generation_start = time.time()
-            ai_responses = []
+                # Get optimal template based on frontend query type and content analysis
+                final_template_key = self.get_optimal_template(prompt_template_key, question)
 
-            # Enhanced: Try multiple models with legal-optimized parameters
-            # 1) Groq first with constitutional optimization
-            if self.groq_client:
+                # [KEEP ALL YOUR EXISTING RETRIEVAL CODE - IT'S PERFECT]
+                retrieval_start = time.time()
                 try:
-                    # Enhanced parameters for constitutional queries
-                    temperature = 0.05 if query_analysis.get('is_constitutional', False) else 0.1
-                    max_tokens = 4000 if query_analysis['complexity_score'] > 0.7 else 3000
+                    # Adaptive retrieval based on query type
+                    retrieval_config = self._get_optimal_retrieval_config(query_analysis, max_results)
                     
-                    response = self.groq_client.chat.completions.create(
-                        model="llama-3.3-70b-versatile",
-                        messages=[{"role": "user", "content": legal_prompt}],
-                        temperature=temperature,
-                        max_tokens=max_tokens,
-                        top_p=0.9  # More focused for legal accuracy
-                    )
+                    # Configure k per retriever with constitutional optimization
+                    self.retrievers['texts'].search_kwargs['k'] = retrieval_config['text_k']
+                    self.retrievers['tables'].search_kwargs['k'] = retrieval_config['tables_k']
+                    self.retrievers['images'].search_kwargs['k'] = retrieval_config['images_k']
+                    self.retrievers['citations'].search_kwargs['k'] = retrieval_config['citations_k']
 
-                    # Your existing defensive check preserved
-                    if not response.choices or not getattr(response.choices[0], "message", None):
-                        raise RuntimeError("Groq returned no choices")
+                    # Enhanced query expansion for constitutional content
+                    enhanced_query = self._enhance_constitutional_query(question, query_analysis)
 
-                    groq_response = (response.choices[0].message.content or "").strip()
-                    groq_confidence = self._calculate_legal_response_confidence(groq_response, query_analysis)
+                    # [KEEP ALL YOUR SAFE_RETRIEVE CODE - IT'S PERFECT]
+                    def safe_retrieve(retriever, query, content_type):
+                        try:
+                            return retriever.invoke(query)
+                        except Exception as e:
+                            if "contigious 2D array" in str(e) or "ef or M is too small" in str(e):
+                                logger.warning(f"🔧 MMR failed for {content_type}, trying different fallback approaches")
+                                
+                                try:
+                                    if hasattr(retriever, 'search_kwargs') and 'search_type' in retriever.search_kwargs:
+                                        logger.info(f"🔧 Trying search_kwargs approach for {content_type}")
+                                        original_kwargs = retriever.search_kwargs.copy()
+                                        retriever.search_kwargs['search_type'] = 'similarity'
+                                        result = retriever.invoke(query)
+                                        retriever.search_kwargs = original_kwargs
+                                        return result
+                                except Exception:
+                                    if hasattr(retriever, 'search_kwargs'):
+                                        retriever.search_kwargs = retriever.search_kwargs.copy()
+                                
+                                try:
+                                    if hasattr(retriever, 'search_type'):
+                                        logger.info(f"🔧 Trying direct search_type approach for {content_type}")
+                                        original_search_type = retriever.search_type
+                                        retriever.search_type = 'similarity'
+                                        result = retriever.invoke(query)
+                                        retriever.search_type = original_search_type
+                                        return result
+                                except Exception:
+                                    if hasattr(retriever, 'search_type'):
+                                        retriever.search_type = getattr(retriever, '_original_search_type', 'mmr')
+                                
+                                logger.error(f"🔧 All fallback approaches failed for {content_type}")
+                                return []
+                            else:
+                                logger.error(f"🔧 Non-MMR retrieval error for {content_type}: {e}")
+                                return []
 
-                    ai_responses.append({
-                        'text': groq_response,
-                        'model': 'groq_llama_70b_legal',
-                        'confidence': groq_confidence,
-                        'tokens': (getattr(getattr(response, 'usage', None), 'total_tokens', 0) or 0),
-                        'legal_analysis_quality': self._assess_legal_response_quality(groq_response, query_analysis)
-                    })
-                    self.metrics['api_calls']['groq_generation'] += 1
+                    # Safe retrieval calls
+                    text_docs = safe_retrieve(self.retrievers['texts'], enhanced_query, 'texts')
+                    table_docs = safe_retrieve(self.retrievers['tables'], question, 'tables')
+                    image_docs = safe_retrieve(self.retrievers['images'], question, 'images')
+                    citation_docs = safe_retrieve(self.retrievers['citations'], enhanced_query, 'citations') if include_citations else []
+
+                    # 🔍🔍🔍 DIAGNOSTIC BLOCK ADDED HERE 🔍🔍🔍
+                    logger.info(f"\n{'='*80}")
+                    logger.info(f"🔬 PARENT DOCUMENT RETRIEVAL DIAGNOSTIC")
+                    logger.info(f"{'='*80}")
+                    logger.info(f"📊 Retrieved: {len(text_docs)} text docs, {len(table_docs)} tables, {len(image_docs)} images, {len(citation_docs)} citations")
+                    
+                    if text_docs:
+                        logger.info(f"\n--- Inspecting First 3 Retrieved Parent Documents ---")
+                        for i, doc in enumerate(text_docs[:3], 1):
+                            logger.info(f"\n🔹 Parent Doc {i}:")
+                            logger.info(f"   Content length: {len(doc.page_content) if hasattr(doc, 'page_content') else 'NO CONTENT'}")
+                            logger.info(f"   Content preview: {doc.page_content[:150] if hasattr(doc, 'page_content') else 'MISSING'}...")
+                            
+                            if hasattr(doc, 'metadata'):
+                                logger.info(f"   Metadata keys: {list(doc.metadata.keys())}")
+                                logger.info(f"   ✅ sourcefile: {doc.metadata.get('sourcefile', '❌ MISSING')}")
+                                logger.info(f"   ✅ source_file: {doc.metadata.get('source_file', '❌ MISSING')}")
+                                logger.info(f"   ✅ page_number: {doc.metadata.get('page_number', '❌ MISSING')}")
+                                logger.info(f"   ✅ pagenumber: {doc.metadata.get('pagenumber', '❌ MISSING')}")
+                                logger.info(f"   ✅ doc_id: {doc.metadata.get('doc_id', '❌ MISSING')}")
+                                logger.info(f"   ✅ content_type: {doc.metadata.get('content_type', '❌ MISSING')}")
+                            else:
+                                logger.error(f"   ❌ NO METADATA ATTRIBUTE!")
+                    else:
+                        logger.warning("⚠️ NO TEXT DOCUMENTS RETRIEVED!")
+                    
+                    logger.info(f"{'='*80}\n")
+                    # 🔍🔍🔍 END DIAGNOSTIC BLOCK 🔍🔍🔍
+
+                    # Constitutional cross-reference retrieval
+                    if query_analysis.get('is_constitutional', False) and query_analysis['constitutional_articles']:
+                        try:
+                            cross_ref_docs = self._retrieve_constitutional_cross_references(
+                                query_analysis['constitutional_articles'], question
+                            )
+                            text_docs.extend(cross_ref_docs)
+                        except Exception as e:
+                            logger.warning(f"🔧 Constitutional cross-reference failed: {e}")
+
+                    all_docs = text_docs + table_docs + image_docs + citation_docs
+                    retrieval_time = time.time() - retrieval_start
+
+                    self.metrics['processing_times']['vector_search'].append(retrieval_time)
+                    logger.info(f"⚖️ Enhanced retrieval: {len(text_docs)} texts, {len(table_docs)} tables, "
+                                f"{len(image_docs)} images, {len(citation_docs)} citations | Constitutional context: {query_analysis['constitutional_relevance']}")
 
                 except Exception as e:
-                    logger.warning(f"⚖️ Groq legal generation failed: {e}")
+                    logger.error(f"⚖️ Legal document retrieval error: {e}")
+                    self.metrics['error_tracking']['retrieval_errors'] += 1
+                    return {
+                        "error": "Legal document retrieval failed",
+                        "response": "VirLaw AI: Unable to retrieve relevant legal information. Please try rephrasing your query with specific legal terminology.",
+                        "sources": [],
+                        "metadata": {
+                            "retrieval_error": str(e),
+                            "legal_suggestion": "Try using specific Article numbers, case names, or legal concepts"
+                        }
+                    }
 
-            # 2) Enhanced: Gemini 2.0 Flash with constitutional focus
-            try:
-                response = self.gemini_flash.generate_content(legal_prompt)
-                gemini_response = response.text.strip() if response.text else "Unable to generate legal response"
-                gemini_confidence = self._calculate_legal_response_confidence(gemini_response, query_analysis, model='gemini')
+                # [KEEP ALL YOUR DOCUMENT PARSING CODE - IT'S PERFECT]
+                parsed_docs = self.parse_retrieved_docs_ultimate(all_docs, legal_context=query_analysis)
+
+                if not isinstance(parsed_docs, dict):
+                    logger.warning("❌ Invalid parsed_docs format, creating empty structure")
+                    parsed_docs = {
+                        "texts": [],
+                        "images": [],
+                        "citations": [],
+                        "metadata": [],
+                        "confidence_scores": []
+                    }
+
+                texts = parsed_docs.get("texts", []) if parsed_docs else []
                 
-                ai_responses.append({
-                    'text': gemini_response,
-                    'model': 'gemini_flash_2.0_constitutional',
-                    'confidence': gemini_confidence,
-                    'tokens': len(gemini_response.split()) if gemini_response else 0,
-                    'legal_analysis_quality': self._assess_legal_response_quality(gemini_response, query_analysis)
-                })
-                self.metrics['api_calls']['gemini_generation'] += 1
+                if not texts:
+                    return {
+                        "response": self._generate_no_results_legal_response(question, query_analysis),
+                        "sources": [],
+                        "metadata": {
+                            "documents_found": 0,
+                            "query_timestamp": datetime.now().isoformat(),
+                            "legal_analysis": query_analysis,
+                            "suggestions": self._generate_legal_query_suggestions(question, query_analysis)
+                        },
+                        "error": None
+                    }
+
+                citations = parsed_docs.get("citations", [])
+
+                if citations:
+                    citation_summaries = [
+                        {
+                            "summary": doc.page_content if hasattr(doc, "page_content") else str(doc),
+                            "metadata": {
+                                "confidence": 1.0, 
+                                "model_used": "raw",
+                                "legal_authority": self._determine_citation_legal_authority(doc)
+                            }
+                        }
+                        for doc in citations
+                    ]
+                    citation_stats = self.store_with_advanced_metadata(
+                        summaries=citation_summaries,
+                        originals=citations,
+                        content_type="citations"
+                    )
+                    logger.info(f"⚖️ Stored legal citation vectors: {citation_stats}")
+
+                # Build ultimate legal query prompt with constitutional intelligence
+                legal_prompt = self.build_ultimate_prompt(parsed_docs, question, final_template_key)
+
+                # FIXED: Enhanced generation using API manager (Gemini-only for queries)
+                generation_start = time.time()
+                
+                try:
+                    logger.info("🔍 Using API Manager for user query (Gemini-only mode)")
+                    
+                    # FIXED: Use API manager's generate_query_answer method (Gemini-only)
+                    ai_response, model_used = self.api_manager.generate_query_answer(
+                        legal_prompt, 
+                        legal_context=query_analysis, 
+                        content_type="query"
+                    )
+                    
+                    # Calculate response confidence and quality
+                    response_confidence = self._calculate_legal_response_confidence(ai_response, query_analysis, model='gemini')
+                    legal_quality = self._assess_legal_response_quality(ai_response, query_analysis)
+                    
+                    logger.info(f"✅ Query response generated: {len(ai_response)} chars, model: {model_used}, confidence: {response_confidence:.2f}")
+                    
+                except Exception as e:
+                    logger.error(f"❌ API Manager query generation failed: {e}")
+                    ai_response = "VirLaw AI: I encountered an error while analyzing your legal query. Please try again with specific legal terminology."
+                    model_used = "error_fallback"
+                    response_confidence = 0.1
+                    legal_quality = 0.1
+                    self.metrics['error_tracking']['api_errors'] += 1
+
+                generation_time = time.time() - generation_start
+
+                # Legal response post-processing
+                ai_response = self._enhance_legal_response_formatting(ai_response, query_analysis)
+
+                # Extract sources with legal authority ranking
+                sources = self.extract_sources_with_legal_authority(parsed_docs, question, query_analysis)
+
+                # Calculate enhanced metrics
+                total_query_time = time.time() - query_start
+
+                # Comprehensive legal response metadata
+                response_metadata = {
+                    "query_timestamp": datetime.now().isoformat(),
+                    "model_used": model_used,
+                    "response_confidence": response_confidence,
+                    "query_type": final_template_key,
+                    "legal_analysis": {
+                        "query_classification": query_analysis['query_type'],
+                        "constitutional_relevance": query_analysis['constitutional_relevance'],
+                        "legal_complexity": query_analysis['complexity_score'],
+                        "constitutional_articles_referenced": query_analysis['constitutional_articles'],
+                        "legal_concepts_identified": query_analysis['legal_concepts'],
+                        "response_quality_score": legal_quality,
+                        "citation_authority_level": self._calculate_citation_authority_score(sources)
+                    },
+                    "processing_time": {
+                        "total_seconds": total_query_time,
+                        "retrieval_seconds": retrieval_time,
+                        "generation_seconds": generation_time
+                    },
+                    "documents_analyzed": {
+                        "total": len(all_docs),
+                        "texts": len(text_docs),
+                        "tables": len(table_docs),
+                        "images": len(image_docs),
+                        "citations": len(citation_docs),
+                        "constitutional_cross_references": len([d for d in text_docs if 'constitutional_cross_reference' in str(d)])
+                    },
+                    "performance_metrics": {
+                        "retrieval_efficiency": min(1.0, 5.0 / retrieval_time),
+                        "generation_efficiency": min(1.0, 10.0 / generation_time),
+                        "legal_accuracy_score": (response_confidence + legal_quality) / 2,
+                        "overall_score": response_confidence * min(1.0, 15.0 / total_query_time)
+                    },
+                    "api_usage": self.metrics['api_calls']
+                }
+
+                # Update legal query statistics
+                self._update_legal_query_metrics(query_analysis, response_confidence, total_query_time)
+
+                # Record comprehensive query metrics
+                if hasattr(self, 'record_query_metrics'):
+                    self.record_query_metrics(
+                        final_template_key,
+                        total_query_time, 
+                        response_confidence, 
+                        response_confidence > confidence_threshold,
+                        len(sources)
+                    )
+
+                return {
+                    "response": ai_response,
+                    "sources": sources,
+                    "metadata": response_metadata,
+                    "error": None,
+                    "confidence": response_confidence,
+                    "query_type": final_template_key,
+                    "processing_stats": self.processing_stats,
+                    "query_id": str(uuid.uuid4()),
+                    "legal_analysis": query_analysis,
+                    "constitutional_context": self._generate_constitutional_context_summary(query_analysis, sources)
+                }
 
             except Exception as e:
-                logger.warning(f"⚖️ Gemini constitutional generation failed: {e}")
-
-            generation_time = time.time() - generation_start
-
-            # Enhanced: Select best legal response
-            if ai_responses:
-                best_response = self._select_best_legal_response(ai_responses, query_analysis)
-                ai_response = best_response['text']
-                model_used = best_response['model']
-                response_confidence = best_response['confidence']
-                legal_quality = best_response.get('legal_analysis_quality', 0.5)
-            else:
-                ai_response = "VirLaw AI: I encountered an error while analyzing your legal query. Please try again with specific legal terminology."
-                model_used = "error_fallback"
-                response_confidence = 0.1
-                legal_quality = 0.1
+                logger.error(f"❌ Error in ultimate legal query processing: {e}")
                 self.metrics['error_tracking']['api_errors'] += 1
+                self.query_metrics['failed_queries'] += 1
+                return {
+                    "response": f"VirLaw AI: An unexpected error occurred while processing your legal query. Please try again with specific legal terminology.",
+                    "sources": [],
+                    "error": str(e),
+                    "metadata": {
+                        "error_timestamp": datetime.now().isoformat(),
+                        "error_type": type(e).__name__,
+                        "traceback": traceback.format_exc(),
+                        "legal_error_context": "Constitutional query processing failed"
+                    },
+                    "confidence": 0.0,
+                    "legal_analysis": {"error": "Query analysis failed"}
+                }
 
-            # Enhanced: Legal response post-processing
-            ai_response = self._enhance_legal_response_formatting(ai_response, query_analysis)
-
-            # Enhanced: Extract sources with legal authority ranking
-            sources = self.extract_sources_with_legal_authority(parsed_docs, question, query_analysis)
-
-            # Calculate enhanced metrics
-            total_query_time = time.time() - query_start
-
-            # FIXED: Enhanced: Comprehensive legal response metadata - using final_template_key
-            response_metadata = {
-                "query_timestamp": datetime.now().isoformat(),
-                "model_used": model_used,
-                "response_confidence": response_confidence,
-                "query_type": final_template_key,  # FIXED: Using final_template_key instead of prompt_template_key
-                "legal_analysis": {
-                    "query_classification": query_analysis['query_type'],
-                    "constitutional_relevance": query_analysis['constitutional_relevance'],
-                    "legal_complexity": query_analysis['complexity_score'],
-                    "constitutional_articles_referenced": query_analysis['constitutional_articles'],
-                    "legal_concepts_identified": query_analysis['legal_concepts'],
-                    "response_quality_score": legal_quality,
-                    "citation_authority_level": self._calculate_citation_authority_score(sources)
-                },
-                "processing_time": {
-                    "total_seconds": total_query_time,
-                    "retrieval_seconds": retrieval_time,
-                    "generation_seconds": generation_time
-                },
-                "documents_analyzed": {
-                    "total": len(all_docs),
-                    "texts": len(text_docs),
-                    "tables": len(table_docs),
-                    "images": len(image_docs),
-                    "citations": len(citation_docs),
-                    "constitutional_cross_references": len([d for d in text_docs if 'constitutional_cross_reference' in str(d)])
-                },
-                "performance_metrics": {
-                    "retrieval_efficiency": min(1.0, 5.0 / retrieval_time),
-                    "generation_efficiency": min(1.0, 10.0 / generation_time),
-                    "legal_accuracy_score": (response_confidence + legal_quality) / 2,
-                    "overall_score": response_confidence * min(1.0, 15.0 / total_query_time)
-                },
-                "api_usage": self.metrics['api_calls'],
-                "alternatives_generated": len(ai_responses)
-            }
-
-            # Enhanced: Update legal query statistics
-            self._update_legal_query_metrics(query_analysis, response_confidence, total_query_time)
-
-            # Enhanced: Record comprehensive query metrics
-            if hasattr(self, 'record_query_metrics'):
-                self.record_query_metrics(
-                    final_template_key,  # FIXED: Using final_template_key instead of prompt_template_key
-                    total_query_time, 
-                    response_confidence, 
-                    response_confidence > confidence_threshold,
-                    len(sources)
-                )
-
-            return {
-                "response": ai_response,
-                "sources": sources,
-                "metadata": response_metadata,
-                "error": None,
-                "confidence": response_confidence,
-                "query_type": final_template_key,  # FIXED: Using final_template_key instead of prompt_template_key
-                "processing_stats": self.processing_stats,
-                "query_id": str(uuid.uuid4()),
-                "legal_analysis": query_analysis,
-                "constitutional_context": self._generate_constitutional_context_summary(query_analysis, sources)
-            }
-
-        except Exception as e:
-            logger.error(f"❌ Error in ultimate legal query processing: {e}")
-            self.metrics['error_tracking']['api_errors'] += 1
-            self.query_metrics['failed_queries'] += 1
-            return {
-                "response": f"VirLaw AI: An unexpected error occurred while processing your legal query. Please try again with specific legal terminology.",
-                "sources": [],
-                "error": str(e),
-                "metadata": {
-                    "error_timestamp": datetime.now().isoformat(),
-                    "error_type": type(e).__name__,
-                    "traceback": traceback.format_exc(),
-                    "legal_error_context": "Constitutional query processing failed"
-                },
-                "confidence": 0.0,
-                "legal_analysis": {"error": "Query analysis failed"}
-            }
 
     def _generate_constitutional_context_summary(
             self,
@@ -4087,24 +4767,75 @@ class UltimateLegalAssistant:
             }
 
     def _enhance_constitutional_query(self, question: str, query_analysis: Dict) -> str:
-        """Enhance query with constitutional context for better retrieval"""
+        """Enhanced query expansion with sub-clause support for better retrieval"""
         
         if not query_analysis.get('is_constitutional', False):
             return question
         
         enhanced_query = question
         
-        # Add related constitutional terms
+        # ENHANCEMENT 1: Sub-clause specific expansion
+        # Detect patterns like Article 26(a), Article 19(1)(a), Article 22(4)
+        subclause_match = re.search(r'Article\s+(\d+[A-Z]?)\(([a-z0-9]+)\)', question, re.I)
+        
+        if subclause_match:
+            article_num = subclause_match.group(1)
+            subclause = subclause_match.group(2)
+            
+            # Add semantic keywords based on article domain
+            article_int = int(re.search(r'\d+', article_num).group())
+            
+            # Article-specific domain keywords
+            domain_keywords = {
+                range(19, 23): "freedom speech expression assembly association movement residence profession",
+                range(25, 29): "religious freedom worship practice propagate establish maintain institutions",
+                range(14, 18): "equality discrimination caste religion race sex place birth",
+                range(20, 25): "protection rights arrest detention trial procedure safeguards",
+                range(29, 31): "cultural educational rights minorities language script institutions",
+            }
+            
+            # Find matching domain
+            for article_range, keywords in domain_keywords.items():
+                if article_int in article_range:
+                    enhanced_query += f" {keywords}"
+                    logger.info(f"🎯 Sub-clause expansion: Article {article_num}({subclause}) → Added domain keywords")
+                    break
+            
+            # Generic sub-clause expansion
+            enhanced_query += f" Article {article_num} clause {subclause} provision sub-clause fundamental rights"
+        
+        # ENHANCEMENT 2: Add constitutional provision context
         if query_analysis['constitutional_articles']:
             enhanced_query += " constitutional provision"
         
-        # Add Part context if articles are mentioned
+        # ENHANCEMENT 3: Part-based context expansion
         article_nums = [int(re.search(r'\d+', art).group()) for art in query_analysis['constitutional_articles'] if re.search(r'\d+', art)]
+        
         for num in article_nums:
             if 12 <= num <= 35:
-                enhanced_query += " fundamental rights Part III"
+                enhanced_query += " fundamental rights Part III Constitution India"
             elif 36 <= num <= 51:
-                enhanced_query += " directive principles Part IV"
+                enhanced_query += " directive principles state policy Part IV"
+        
+        # ENHANCEMENT 4: Query verb semantic expansion
+        # Expand common query verbs with their legal equivalents
+        verb_expansions = {
+            r'\ballow\b': 'allow permit authorize enable establish maintain provide',
+            r'\brestrict\b': 'restrict limitation prohibition constraint regulation',
+            r'\bguarantee\b': 'guarantee ensure protect safeguard right provision',
+            r'\bprohibit\b': 'prohibit forbid bar prevent disallow restrict',
+        }
+        
+        for pattern, expansion in verb_expansions.items():
+            if re.search(pattern, question, re.I):
+                enhanced_query += f" {expansion}"
+                break
+        
+        # Log the enhancement
+        if enhanced_query != question:
+            logger.info(f" Query expanded from {len(question)} to {len(enhanced_query)} chars")
+            logger.debug(f"   Original: {question}")
+            logger.debug(f"   Enhance: {enhanced_query}")
         
         return enhanced_query
 
@@ -4308,51 +5039,140 @@ class UltimateLegalAssistant:
 
     def build_ultimate_prompt(self, context_data: Dict, user_question: str, query_type: str) -> str:
         """Build ultimate legal prompts with advanced context"""
-        text_context = ""
-        citation_context = ""
-
-        if context_data["texts"]:
-            high_conf_texts = []
-            med_conf_texts = []
-            conf_list = context_data.get("confidence_scores") or []
-
-            for i, doc in enumerate(context_data["texts"]):
+        
+        sources_text = ""
+        source_count = 0
+        
+        if context_data.get("texts"):
+            conf_list = context_data.get("confidence_scores", [])
+            
+            for i, doc in enumerate(context_data["texts"][:15]):
                 content = doc.page_content if hasattr(doc, 'page_content') else str(doc)
                 confidence = conf_list[i] if i < len(conf_list) else 0.8
+                
+                if confidence < 0.6:
+                    continue
+                
+                source_count += 1
+                
+                # Extract metadata - Use correct keys WITH underscores
+                metadata = doc.metadata if hasattr(doc, 'metadata') else {}
+                
+                #Check source_file FIRST (what's actually stored)
+                sourcefile = (metadata.get('source_file') or      # ← PRIMARY
+                            metadata.get('sourcefile') or         # ← Fallback
+                            metadata.get('document_name') or 
+                            'Constitution of India')
+                
+                #Check page_number FIRST
+                page = (metadata.get('page_number') or           # ← PRIMARY
+                        metadata.get('pagenumber') or            # ← Fallback
+                        metadata.get('page') or 
+                        'N/A')
+                
+                #Check section_tag FIRST
+                section = (metadata.get('section_tag') or        # ← PRIMARY
+                        metadata.get('sectiontag') or            # ← Fallback
+                        metadata.get('element_id') or 
+                        '')
+                
+                # Check file_hash FIRST
+                file_hash = (metadata.get('file_hash') or        # ← PRIMARY
+                            metadata.get('filehash') or          # ← Fallback
+                            'unknown')
+                if len(file_hash) > 8:
+                    file_hash = file_hash[:8]
+                
+                # Parse Article/Section/Part from metadata or content
+                article_label = "Legal Document"
+                
+                # Try section first
+                if section:
+                    article_match = re.search(r'article[- ]?(\d+[a-z]?)', section, re.I)
+                    part_match = re.search(r'part[- ]?([ivx]+[a-z]?)', section, re.I)
+                    section_match = re.search(r'section[- ]?(\d+[a-z]?)', section, re.I)
+                    
+                    if article_match:
+                        article_label = f"Article {article_match.group(1).upper()}"
+                    elif part_match:
+                        article_label = f"Part {part_match.group(1).upper()}"
+                    elif section_match:
+                        article_label = f"Section {section_match.group(1)}"
+                
+                # If no label from section, try content
+                if article_label == "Legal Document":
+                    content_article = re.search(r'\bArticle\s+(\d+[A-Z]?)\b', content[:200], re.I)
+                    content_part = re.search(r'\bPart\s+([IVX]+[A-Z]?)\b', content[:200], re.I)
+                    
+                    if content_article:
+                        article_label = f"Article {content_article.group(1)}"
+                    elif content_part:
+                        article_label = f"Part {content_part.group(1)}"
+                
+                # Format source entry
+                sources_text += f"""[Source {source_count}] {article_label}
+    Document: {sourcefile}
+    Page: {page}
+    Document ID: {file_hash}
+    Relevance: {confidence:.0%}
 
-                if confidence > 0.8:
-                    high_conf_texts.append(content)
-                else:
-                    med_conf_texts.append(content)
+    Content:
+    {content[:600].strip()}...
 
-            text_context = "\n\n".join(high_conf_texts + med_conf_texts[:5]) # Limit context
+    ---
 
-        if context_data["citations"]:
-            citations = []
-            for doc in context_data["citations"][:10]:
+    """
+        
+        # STEP 2: Add citations
+        if context_data.get("citations"):
+            for doc in context_data["citations"][:8]:
                 content = doc.page_content if hasattr(doc, 'page_content') else str(doc)
-                citations.append(content)
-            citation_context = "\n".join(citations)
+                
+                if len(content.strip()) < 20:
+                    continue
+                
+                source_count += 1
+                sources_text += f"""[Source {source_count}] Legal Citation
+    Content: {content[:400].strip()}...
 
-        source_info = ""
-        if context_data.get("metadata"):
-            unique_sources = set()
-            for meta in context_data["metadata"]:
-                if meta.get("document_name"):
-                    unique_sources.add(meta["document_name"])
-            if unique_sources:
-                source_info = f"Source Documents: {', '.join(list(unique_sources)[:5])}"
+    ---
 
+    """
+        
+        # STEP 3: Build context summary
+        text_count = len(context_data.get("texts", []))
+        citation_count = len(context_data.get("citations", []))
+        
+        if source_count > 0:
+            context_summary = f"Retrieved {text_count} constitutional/legal documents and {citation_count} legal citations from the document library. The most relevant sources are provided below for your analysis."
+        else:
+            context_summary = "No directly relevant documents were found in the library for this specific query."
+            sources_text = "(No sources available - please use your constitutional law training)"
+        
+        # STEP 4: Fill template
         template = self.prompt_templates[query_type]
         prompt = template.format(
-            context=text_context,        # FIX: Use the text_context you built above
-            sources=citation_context,    # FIX: Use the citation_context you built above  
-            question=user_question       # FIX: Use the correct parameter name
+            context=context_summary,
+            sources=sources_text,
+            question=user_question
         )
         
+        # Debug log
+        logger.info(f"📄 Built prompt with {source_count} sources ({text_count} docs, {citation_count} citations)")
+        logger.info(f"📄 Prompt length: {len(prompt)} chars, Articles mentioned: {prompt.count('Article')}")
+        
+        #Debug log checks BOTH key formats
+        if context_data.get("texts") and len(context_data["texts"]) > 0:
+            first_doc = context_data["texts"][0]
+            if hasattr(first_doc, 'metadata'):
+                logger.info(f"🔍 First doc metadata keys: {list(first_doc.metadata.keys())}")
+                logger.info(f"🔍 Metadata check:")
+                logger.info(f"   source_file (underscore): {first_doc.metadata.get('source_file')}")
+                logger.info(f"   sourcefile (no underscore): {first_doc.metadata.get('sourcefile')}")
+                logger.info(f"   page_number (underscore): {first_doc.metadata.get('page_number')}")
+                logger.info(f"   pagenumber (no underscore): {first_doc.metadata.get('pagenumber')}")
+        
         return prompt
-
-
 
     def extract_sources_with_confidence(self, parsed_docs: Dict, question: str) -> List[Dict[str, Any]]:
         """Extract source information with confidence scoring"""
@@ -4393,7 +5213,7 @@ class UltimateLegalAssistant:
             current_time_datetime = datetime.now()
             start_time_float = getattr(self, 'start_time', current_time_float)
             
-            # Enhanced: System uptime calculation (FIXED)
+            # System uptime calculation (FIXED)
             uptime_seconds = current_time_float - start_time_float
 
             # Your existing success rate calculation preserved
@@ -4406,7 +5226,7 @@ class UltimateLegalAssistant:
             for metric, times in self.metrics.get('processing_times', {}).items():
                 avg_times[metric] = sum(times) / max(len(times), 1) if times else 0
 
-            # Enhanced: Legal document analysis (with safe calls)
+            # Legal document analysis (with safe calls)
             legal_analysis = self._get_comprehensive_legal_analysis() if hasattr(self, '_get_comprehensive_legal_analysis') else {}
             constitutional_coverage = self._assess_constitutional_coverage() if hasattr(self, '_assess_constitutional_coverage') else {}
             system_performance = self._calculate_system_performance_grade() if hasattr(self, '_calculate_system_performance_grade') else {}
@@ -4431,7 +5251,7 @@ class UltimateLegalAssistant:
                 "performance_metrics": {
                     "query_statistics": {
                         **self.query_metrics,
-                        # Enhanced: Legal query breakdown
+                        # Legal query breakdown
                         "constitutional_queries": self.metrics.get('api_calls', {}).get('constitutional_queries', 0),
                         "case_law_queries": self.metrics.get('query_statistics', {}).get('case_law_queries', 0),
                         "statutory_queries": self.metrics.get('query_statistics', {}).get('statutory_queries', 0),
@@ -4441,7 +5261,7 @@ class UltimateLegalAssistant:
                     "average_processing_times": avg_times,
                     "api_call_counts": {
                         **self.metrics.get('api_calls', {}),
-                        # Enhanced: InLegalBERT specific tracking
+                        # InLegalBERT specific tracking
                         "inlegalbert_embeddings": self.metrics.get('api_calls', {}).get('inlegalbert_embeddings', 0),
                         "constitutional_analysis_calls": legal_analysis.get("total_constitutional_analyses", 0)
                     },
@@ -4462,19 +5282,19 @@ class UltimateLegalAssistant:
                     "total_images": self.processing_stats.get("total_images", 0),
                     "total_citations": self.processing_stats.get("total_citations", 0),
                     
-                    # Enhanced: Constitutional document statistics
+                    # Constitutional document statistics
                     "constitutional_articles": legal_analysis.get("total_articles", 0),
                     "constitutional_parts": len(legal_analysis.get("parts_identified", [])),
                     "constitutional_schedules": legal_analysis.get("schedules_processed", 0),
                     "constitutional_amendments": legal_analysis.get("amendments_referenced", 0),
                     
-                    # Enhanced: Legal citation breakdown
+                    # Legal citation breakdown
                     "supreme_court_cases": legal_analysis.get("supreme_court_citations", 0),
                     "high_court_cases": legal_analysis.get("high_court_citations", 0),
                     "statutory_references": legal_analysis.get("statutory_sections", 0),
                     "constitutional_cross_references": legal_analysis.get("cross_references", 0),
                     
-                    # Enhanced: Document type distribution
+                    # Document type distribution
                     "document_distribution": {
                         "constitutional_percentage": legal_analysis.get("constitutional_percentage", 0),
                         "statutory_percentage": legal_analysis.get("statutory_percentage", 0),
@@ -4495,7 +5315,7 @@ class UltimateLegalAssistant:
                     "real_time_streaming": True,
                     "multi_language_support": True,
                     
-                    # Enhanced: Constitutional and legal capabilities
+                    # Constitutional and legal capabilities
                     "constitutional_analysis": True,
                     "indian_legal_system_expertise": True,
                     "inlegalbert_embeddings": True,
@@ -4517,7 +5337,7 @@ class UltimateLegalAssistant:
                     "openai_gpt": False,
                     "local_embeddings": True,
                     
-                    # Enhanced: Legal-specific model status
+                    # Legal-specific model status
                     "inlegalbert": True,
                     "gemini_flash_constitutional": True,
                     "groq_llama_legal": bool(getattr(self, 'groq_client', False)),
@@ -4817,7 +5637,7 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 UPLOAD_FOLDER = './legal_documents'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Enhanced: Constitutional document priority folder
+# Constitutional document priority folder
 CONSTITUTIONAL_FOLDER = './constitutional_documents'
 os.makedirs(CONSTITUTIONAL_FOLDER, exist_ok=True)
 
@@ -4862,7 +5682,7 @@ def get_detailed_stats():
                 "memory_usage": "Available in production deployment",
                 "cpu_usage": "Available in production deployment"
             },
-            # Enhanced: Legal system intelligence
+            # Legal system intelligence
             "legal_intelligence": {
                 "constitutional_documents_available": ultimate_legal_assistant.processing_stats.get("legal_analysis", {}).get("constitutional_documents", 0) > 0,
                 "total_constitutional_articles": ultimate_legal_assistant.processing_stats.get("legal_analysis", {}).get("total_articles_processed", 0),
@@ -4875,7 +5695,7 @@ def get_detailed_stats():
         logger.error(f"⚖️ Error getting detailed constitutional stats: {e}")
         return jsonify({"error": str(e)}), 500
 
-# Enhanced: MAIN COMPATIBILITY ENDPOINT with constitutional intelligence
+# MAIN COMPATIBILITY ENDPOINT with constitutional intelligence
 @app.route("/gemini-rag", methods=["POST"])
 def enhanced_constitutional_rag():
     """
@@ -4941,7 +5761,7 @@ def enhanced_constitutional_rag():
             source_count = len(sources)
             confidence = result.get("confidence", 0.8)
             
-            # Enhanced: Constitutional source analysis
+            # Constitutional source analysis
             constitutional_sources = [s for s in sources if s.get('document', '').lower().find('constitution') != -1]
             case_law_sources = [s for s in sources if any(term in s.get('document', '').lower() for term in ['court', 'case', 'judgment'])]
             
@@ -4950,7 +5770,7 @@ def enhanced_constitutional_rag():
             else:
                 response_text += f"\n\n⚖️ **Legal Analysis** based on {source_count} legal document sources (Confidence: {confidence:.1%})"
 
-            # Enhanced: Prioritize constitutional sources
+            # Prioritize constitutional sources
             priority_sources = constitutional_sources[:2] + case_law_sources[:1] + [s for s in sources if s not in constitutional_sources and s not in case_law_sources][:2]
             
             if len(priority_sources) > 0:
@@ -4961,7 +5781,7 @@ def enhanced_constitutional_rag():
                     source_type = "📜 Constitutional" if source in constitutional_sources else "⚖️ Judicial" if source in case_law_sources else "📋 Legal"
                     response_text += f"\n• {source_type}: {doc_name} (Page {page_num})"
 
-        # Enhanced: Return format with constitutional metadata + context info
+        # Return format with constitutional metadata + context info
         response_data = {
             "response": response_text,
             "sources": sources if include_sources else [],
@@ -4985,6 +5805,52 @@ def enhanced_constitutional_rag():
             "response": f"VirLaw AI: Sorry, I encountered an error while processing your constitutional law request. Please try again.",
             "constitutional_suggestion": "Try rephrasing with specific Article numbers or constitutional terminology"
         }), 500
+
+    def diagnose_retrieval_for_article_19():
+        """Test why Article 19(2) isn't being retrieved"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        query = "What does Article 19(2) restrict?"
+        
+        # Test 1: Direct similarity search (no MMR)
+        logger.info(f"\n{'='*60}")
+        logger.info(f"🔬 RETRIEVAL DIAGNOSIS: '{query}'")
+        logger.info(f"{'='*60}")
+        
+        # Direct search on vectorstore
+        results = rag_system.vectorstores['text'].similarity_search(query, k=20)
+        logger.info(f"\n✅ Direct similarity_search returned {len(results)} results")
+        
+        article_19_found = False
+        for i, doc in enumerate(results[:10], 1):
+            preview = doc.page_content[:150].replace('\n', ' ')
+            has_19 = 'Article 19' in doc.page_content or 'article 19' in doc.page_content.lower()
+            logger.info(f"\n--- Result {i} ---")
+            logger.info(f"Has Article 19: {has_19}")
+            logger.info(f"Content: {preview}...")
+            logger.info(f"Page: {doc.metadata.get('page_number', 'N/A')}")
+            if has_19:
+                article_19_found = True
+        
+        if not article_19_found:
+            logger.warning("❌ Article 19 NOT in top 10 results!")
+            logger.warning("   This means embedding similarity is too low for this query.")
+        else:
+            logger.info("✅ Article 19 IS in results, but MultiVectorRetriever may be filtering it out")
+        
+        # Test 2: MultiVectorRetriever with current settings
+        retriever_docs = rag_system.retrievers['text'].invoke(query)
+        logger.info(f"\n✅ MultiVectorRetriever returned {len(retriever_docs)} parent documents")
+        
+        for i, doc in enumerate(retriever_docs[:5], 1):
+            preview = doc.page_content[:150].replace('\n', ' ')
+            logger.info(f"\n--- Parent {i} ---")
+            logger.info(f"Content: {preview}...")
+            logger.info(f"Page: {doc.metadata.get('pagenumber', 'N/A')}")
+
+    # Run it
+    diagnose_retrieval_for_article_19()
 
 
 
@@ -5055,7 +5921,7 @@ def process_constitutional_documents_ultimate():
             "suggestion": "Check if the Indian Constitution document is properly uploaded"
         }), 500
 
-# Enhanced: Document upload with constitutional prioritization
+# Document upload with constitutional prioritization
 @app.route("/upload-documents", methods=["POST"])
 def upload_constitutional_documents():
     """Advanced document upload endpoint with constitutional document detection"""
@@ -5075,11 +5941,11 @@ def upload_constitutional_documents():
             filename = secure_filename(file.filename)
             if filename and any(filename.lower().endswith(ext) for ext in ultimate_legal_assistant.supported_formats):
                 try:
-                    # Enhanced: Detect constitutional documents
+                    # Detect constitutional documents
                     is_constitutional = any(term in filename.lower() for term in 
                         ['constitution', 'fundamental', 'rights', 'directive', 'amendment'])
                     
-                    # Enhanced: Save constitutional documents to priority folder
+                    # Save constitutional documents to priority folder
                     if is_constitutional:
                         file_path = os.path.join(CONSTITUTIONAL_FOLDER, filename)
                         # Also save to main folder for processing
@@ -5128,7 +5994,7 @@ def upload_constitutional_documents():
         logger.error(f"⚖️ Error in constitutional document upload: {e}")
         return jsonify({"error": str(e)}), 500
 
-# Enhanced: Query types with constitutional focus
+# Query types with constitutional focus
 @app.route("/query-types", methods=["GET"])
 def get_constitutional_query_types():
     """Get available query types and their descriptions with constitutional law focus"""
@@ -5154,7 +6020,7 @@ def get_constitutional_query_types():
                 "description": "Step-by-step guidance on legal procedures including constitutional remedies",
                 "constitutional_capable": False
             },
-            # Enhanced: New constitutional-specific query types
+            # New constitutional-specific query types
             "constitutional_analysis": {
                 "name": "Constitutional Analysis",
                 "description": "Specialized analysis of constitutional provisions, fundamental rights, and DPSP",
@@ -5175,7 +6041,7 @@ def get_constitutional_query_types():
     
     
 
-# Enhanced: Citation search with constitutional prioritization  
+# Citation search with constitutional prioritization  
 @app.route("/search-citations", methods=["POST"])
 def search_constitutional_citations():
     """Search for specific legal citations with constitutional law prioritization"""
@@ -5186,7 +6052,7 @@ def search_constitutional_citations():
         if not citation_query:
             return jsonify({"error": "Citation query is required"}), 400
 
-        # Enhanced: Search citations with constitutional prioritization
+        # Search citations with constitutional prioritization
         r = ultimate_legal_assistant.retrievers['citations']
         r.search_kwargs['k'] = 25  # Increased for better constitutional coverage
         citation_docs = r.invoke(citation_query)
@@ -5210,7 +6076,7 @@ def search_constitutional_citations():
                 
                 citations.append(citation_info)
                 
-                # Enhanced: Categorize citations
+                # Categorize citations
                 if citation_info["type"] in ["articles", "constitutional_parts", "constitutional_amendments"]:
                     constitutional_citations.append(citation_info)
                 elif citation_info["type"] in ["supreme_court", "high_court"]:
@@ -5222,7 +6088,7 @@ def search_constitutional_citations():
             "citations": citations,
             "total_found": len(citations),
             "query": citation_query,
-            # Enhanced: Constitutional citation breakdown
+            # Constitutional citation breakdown
             "citation_analysis": {
                 "constitutional_citations": len(constitutional_citations),
                 "judicial_citations": len(judicial_citations), 
@@ -5240,7 +6106,7 @@ def search_constitutional_citations():
         logger.error(f"⚖️ Error searching constitutional citations: {e}")
         return jsonify({"error": str(e)}), 500
 
-# Enhanced: Document list with constitutional analysis
+# Document list with constitutional analysis
 @app.route("/document-list", methods=["GET"])
 def get_constitutional_document_list():
     """Get list of processed documents with constitutional analysis"""
@@ -5254,7 +6120,7 @@ def get_constitutional_document_list():
                     file_path = os.path.join(UPLOAD_FOLDER, filename)
                     stat = os.stat(file_path)
                     
-                    # Enhanced: Document type classification
+                    # Document type classification
                     is_constitutional = any(term in filename.lower() for term in 
                         ['constitution', 'fundamental', 'rights', 'directive', 'amendment'])
                     document_type = "constitutional" if is_constitutional else "legal"
@@ -5278,7 +6144,7 @@ def get_constitutional_document_list():
             "documents": document_info,
             "total_count": len(document_info),
             "processed_count": ultimate_legal_assistant.processing_stats.get("total_documents", 0),
-            # Enhanced: Constitutional document analysis
+            # Constitutional document analysis
             "constitutional_analysis": {
                 "constitutional_documents": len(constitutional_docs),
                 "constitution_available": any('constitution' in doc['filename'].lower() for doc in constitutional_docs),
@@ -5362,7 +6228,7 @@ def constitutional_readiness():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # Enhanced: ULTIMATE constitutional system initialization
+    # ULTIMATE constitutional system initialization
     print("🏛️ ULTIMATE Virtual Constitutional Legal Assistant - ALL CAPABILITIES UNLOCKED")
     print("=" * 100)
     print("🚀 ULTIMATE CONSTITUTIONAL FEATURES ENABLED:")
@@ -5382,7 +6248,7 @@ if __name__ == "__main__":
     print("   • Comprehensive constitutional API endpoints")
     print("   • Enhanced React frontend integration with constitutional intelligence")
 
-    # Enhanced: Auto-process documents with constitutional prioritization
+    # Auto-process documents with constitutional prioritization
     constitutional_found = False
     if os.path.exists("./legal_documents"):
         files = [f for f in os.listdir("./legal_documents")

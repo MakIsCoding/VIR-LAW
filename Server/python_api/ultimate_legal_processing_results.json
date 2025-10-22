@@ -6,9 +6,9 @@
     "total_tables": 0,
     "total_images": 0,
     "total_citations": 85,
-    "processing_time_seconds": 271.142265,
-    "throughput_docs_per_minute": 0.2212860470129952,
-    "last_processed": "2025-09-26T20:10:33.450728",
+    "processing_time_seconds": 388.445835,
+    "throughput_docs_per_minute": 0.15446168962012427,
+    "last_processed": "2025-10-02T06:28:07.691038",
     "success_rate": 100.0,
     "storage_results": {
       "texts": {
@@ -29,7 +29,7 @@
           "cross_reference_vectors": 8,
           "deduplication_hits": 0
         },
-        "processing_time_ms": 18299.209594726562
+        "processing_time_ms": 16773.45061302185
       },
       "citations": {
         "stored": 85,
@@ -49,7 +49,7 @@
           "cross_reference_vectors": 0,
           "deduplication_hits": 0
         },
-        "processing_time_ms": 804.189920425415
+        "processing_time_ms": 770.1632976531982
       }
     },
     "documents_list": [
@@ -100,8 +100,8 @@
       "total_articles_processed": 25,
       "total_legal_citations": 85,
       "constitutional_parts_identified": [
-        "IV",
         "in",
+        "IV",
         "is",
         "III"
       ],
@@ -110,31 +110,31 @@
     "constitutional_completeness": {
       "parts_coverage": 18.181818181818183,
       "missing_parts": [
-        "VII",
-        "V",
-        "XX",
-        "VIII",
-        "XVIII",
-        "XIX",
+        "II",
+        "IX",
         "X",
         "XVII",
-        "XI",
-        "XII",
-        "II",
+        "XIX",
+        "XVI",
+        "XX",
         "VI",
         "XIII",
-        "IX",
-        "XXI",
-        "I",
         "XV",
+        "VIII",
+        "XI",
+        "V",
+        "XVIII",
+        "XXII",
+        "I",
+        "VII",
         "XIV",
-        "XVI",
-        "XXII"
+        "XXI",
+        "XII"
       ],
       "found_parts": [
+        "is",
         "IV",
         "in",
-        "is",
         "III"
       ],
       "constitutional_documents_processed": 1,
@@ -164,7 +164,7 @@
             "legal_complexity": 1.046,
             "page_number": 1,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 846,
             "estimated_tokens": 211,
@@ -184,7 +184,7 @@
             "legal_complexity": 1.3840000000000001,
             "page_number": 1,
             "section_tag": "177efcf986",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 634,
             "estimated_tokens": 158,
@@ -204,7 +204,7 @@
             "legal_complexity": 1.3860000000000001,
             "page_number": 1,
             "section_tag": "right-to-equality",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 786,
             "estimated_tokens": 196,
@@ -224,7 +224,7 @@
             "legal_complexity": 3.1399999999999997,
             "page_number": 2,
             "section_tag": "1e8dd52769",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1490,
             "estimated_tokens": 372,
@@ -244,7 +244,7 @@
             "legal_complexity": 3.455,
             "page_number": 2,
             "section_tag": "0acae7b2c6",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1855,
             "estimated_tokens": 463,
@@ -264,7 +264,7 @@
             "legal_complexity": 0.528,
             "page_number": 2,
             "section_tag": "0acae7b2c6",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 328,
             "estimated_tokens": 82,
@@ -284,7 +284,7 @@
             "legal_complexity": 2.149,
             "page_number": 3,
             "section_tag": "2e2cd4aed3",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 949,
             "estimated_tokens": 237,
@@ -304,7 +304,7 @@
             "legal_complexity": 4.003,
             "page_number": 4,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1953,
             "estimated_tokens": 488,
@@ -324,7 +324,7 @@
             "legal_complexity": 1.449,
             "page_number": 4,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 349,
             "estimated_tokens": 87,
@@ -344,7 +344,7 @@
             "legal_complexity": 2.205,
             "page_number": 5,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1405,
             "estimated_tokens": 351,
@@ -364,7 +364,7 @@
             "legal_complexity": 1.974,
             "page_number": 5,
             "section_tag": "c2347e6d8a",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 874,
             "estimated_tokens": 218,
@@ -384,7 +384,7 @@
             "legal_complexity": 1.242,
             "page_number": 6,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 842,
             "estimated_tokens": 210,
@@ -404,7 +404,7 @@
             "legal_complexity": 4.303000000000001,
             "page_number": 6,
             "section_tag": "9d081365e0",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1903,
             "estimated_tokens": 475,
@@ -424,7 +424,7 @@
             "legal_complexity": 1.022,
             "page_number": 6,
             "section_tag": "9d081365e0",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 472,
             "estimated_tokens": 118,
@@ -444,7 +444,7 @@
             "legal_complexity": 2.2560000000000002,
             "page_number": 7,
             "section_tag": "b1a1ee1729",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1106,
             "estimated_tokens": 276,
@@ -464,7 +464,7 @@
             "legal_complexity": 2.8840000000000003,
             "page_number": 7,
             "section_tag": "7e62a5f35e",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1084,
             "estimated_tokens": 271,
@@ -484,7 +484,7 @@
             "legal_complexity": 3.2220000000000004,
             "page_number": 8,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1872,
             "estimated_tokens": 468,
@@ -504,7 +504,7 @@
             "legal_complexity": 0.456,
             "page_number": 8,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 206,
             "estimated_tokens": 51,
@@ -524,7 +524,7 @@
             "legal_complexity": 2.529,
             "page_number": 8,
             "section_tag": "fcd2fdb364",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1629,
             "estimated_tokens": 407,
@@ -544,7 +544,7 @@
             "legal_complexity": 1.766,
             "page_number": 9,
             "section_tag": "d0f5dc6c3c",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 966,
             "estimated_tokens": 241,
@@ -564,7 +564,7 @@
             "legal_complexity": 4.428,
             "page_number": 10,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1928,
             "estimated_tokens": 482,
@@ -584,7 +584,7 @@
             "legal_complexity": 1.813,
             "page_number": 11,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1313,
             "estimated_tokens": 328,
@@ -604,7 +604,7 @@
             "legal_complexity": 2.6340000000000003,
             "page_number": 11,
             "section_tag": "60cf06ba2c",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 784,
             "estimated_tokens": 196,
@@ -624,7 +624,7 @@
             "legal_complexity": 2.156,
             "page_number": 12,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1256,
             "estimated_tokens": 314,
@@ -644,7 +644,7 @@
             "legal_complexity": 4.15,
             "page_number": 12,
             "section_tag": "7990f4baee",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1300,
             "estimated_tokens": 325,
@@ -664,7 +664,7 @@
             "legal_complexity": 4.539,
             "page_number": 13,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1839,
             "estimated_tokens": 459,
@@ -684,7 +684,7 @@
             "legal_complexity": 4.246,
             "page_number": 14,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 1996,
             "estimated_tokens": 499,
@@ -704,7 +704,7 @@
             "legal_complexity": 1.5190000000000001,
             "page_number": 15,
             "section_tag": "part-iii",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 669,
             "estimated_tokens": 167,
@@ -724,7 +724,7 @@
             "legal_complexity": 0.30000000000000004,
             "page_number": 15,
             "section_tag": "5806962a96",
-            "source_file": "fundamental rights pdf.pdf",
+            "sourcefile": "fundamental rights pdf.pdf",
             "file_hash": "6f379f722a28af72086c78778c7c8c2d",
             "char_count": 100,
             "estimated_tokens": 25,
@@ -757,7 +757,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -775,7 +775,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -793,7 +793,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -817,7 +817,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "177efcf986",
           "document_context": "constitutional"
@@ -841,7 +841,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "right-to-equality",
           "document_context": "constitutional"
@@ -859,7 +859,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "right-to-equality",
           "document_context": "constitutional"
@@ -880,7 +880,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "right-to-equality",
           "document_context": "constitutional"
@@ -904,7 +904,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "1e8dd52769",
           "document_context": "constitutional"
@@ -928,7 +928,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "1e8dd52769",
           "document_context": "constitutional"
@@ -952,7 +952,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "1e8dd52769",
           "document_context": "constitutional"
@@ -972,7 +972,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "1e8dd52769",
           "document_context": "constitutional"
@@ -996,7 +996,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "0acae7b2c6",
           "document_context": "constitutional"
@@ -1014,7 +1014,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "0acae7b2c6",
           "document_context": "constitutional"
@@ -1034,7 +1034,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "2e2cd4aed3",
           "document_context": "constitutional"
@@ -1058,7 +1058,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1076,7 +1076,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1096,7 +1096,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1116,7 +1116,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1136,7 +1136,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1156,7 +1156,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1180,7 +1180,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1198,7 +1198,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1218,7 +1218,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1242,7 +1242,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1260,7 +1260,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1280,7 +1280,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "9d081365e0",
           "document_context": "constitutional"
@@ -1304,7 +1304,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "b1a1ee1729",
           "document_context": "constitutional"
@@ -1322,7 +1322,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "b1a1ee1729",
           "document_context": "constitutional"
@@ -1342,7 +1342,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "b1a1ee1729",
           "document_context": "constitutional"
@@ -1362,7 +1362,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7e62a5f35e",
           "document_context": "constitutional"
@@ -1382,7 +1382,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7e62a5f35e",
           "document_context": "constitutional"
@@ -1402,7 +1402,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7e62a5f35e",
           "document_context": "constitutional"
@@ -1426,7 +1426,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1444,7 +1444,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1464,7 +1464,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1484,7 +1484,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1504,7 +1504,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1528,7 +1528,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "fcd2fdb364",
           "document_context": "constitutional"
@@ -1552,7 +1552,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "fcd2fdb364",
           "document_context": "constitutional"
@@ -1570,7 +1570,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "fcd2fdb364",
           "document_context": "constitutional"
@@ -1591,7 +1591,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "fcd2fdb364",
           "document_context": "constitutional"
@@ -1615,7 +1615,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1639,7 +1639,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1657,7 +1657,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1681,7 +1681,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1705,7 +1705,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1729,7 +1729,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1747,7 +1747,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1771,7 +1771,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "60cf06ba2c",
           "document_context": "constitutional"
@@ -1795,7 +1795,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "60cf06ba2c",
           "document_context": "constitutional"
@@ -1819,7 +1819,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "60cf06ba2c",
           "document_context": "constitutional"
@@ -1839,7 +1839,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "60cf06ba2c",
           "document_context": "constitutional"
@@ -1863,7 +1863,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1887,7 +1887,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1907,7 +1907,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1925,7 +1925,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -1949,7 +1949,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7990f4baee",
           "document_context": "constitutional"
@@ -1973,7 +1973,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7990f4baee",
           "document_context": "constitutional"
@@ -1997,7 +1997,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7990f4baee",
           "document_context": "constitutional"
@@ -2021,7 +2021,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7990f4baee",
           "document_context": "constitutional"
@@ -2045,7 +2045,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7990f4baee",
           "document_context": "constitutional"
@@ -2069,7 +2069,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7990f4baee",
           "document_context": "constitutional"
@@ -2089,7 +2089,7 @@
           "jurisdiction": "Statutory",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "7990f4baee",
           "document_context": "constitutional"
@@ -2113,7 +2113,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2137,7 +2137,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2161,7 +2161,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2179,7 +2179,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2200,7 +2200,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2221,7 +2221,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2242,7 +2242,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2263,7 +2263,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2284,7 +2284,7 @@
           "jurisdiction": "General",
           "is_constitutional": false,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2308,7 +2308,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2332,7 +2332,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2356,7 +2356,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2380,7 +2380,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2404,7 +2404,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2428,7 +2428,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2446,7 +2446,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2470,7 +2470,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2494,7 +2494,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2512,7 +2512,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2532,7 +2532,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2552,7 +2552,7 @@
           "jurisdiction": "General",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "part-iii",
           "document_context": "constitutional"
@@ -2576,7 +2576,7 @@
           "jurisdiction": "Constitutional",
           "is_constitutional": true,
           "cross_references": [],
-          "source_file": "fundamental rights pdf.pdf",
+          "sourcefile": "fundamental rights pdf.pdf",
           "file_hash": "6f379f722a28af72086c78778c7c8c2d",
           "parent_section": "5806962a96",
           "document_context": "constitutional"
@@ -2595,8 +2595,8 @@
       "total_articles_processed": 25,
       "total_legal_citations": 85,
       "constitutional_parts_identified": [
-        "IV",
         "in",
+        "IV",
         "is",
         "III"
       ],
@@ -2622,7 +2622,7 @@
         "cross_reference_vectors": 8,
         "deduplication_hits": 0
       },
-      "processing_time_ms": 18299.209594726562
+      "processing_time_ms": 16773.45061302185
     },
     "citations": {
       "stored": 85,
@@ -2642,23 +2642,24 @@
         "cross_reference_vectors": 0,
         "deduplication_hits": 0
       },
-      "processing_time_ms": 804.189920425415
+      "processing_time_ms": 770.1632976531982
     }
   },
   "performance_metrics": {
     "api_calls": {
       "gemini_embedding": 0,
       "gemini_generation": 0,
-      "groq_generation": 28,
+      "groq_generation": 0,
       "total_tokens": 0,
       "inlegalbert_embeddings": 0,
       "constitutional_queries": 0,
       "case_law_queries": 0,
-      "statutory_queries": 0
+      "statutory_queries": 0,
+      "successful_generation": 28
     },
     "processing_times": {
       "document_parsing": [
-        1.210038423538208
+        1.1614990234375
       ],
       "embedding_generation": [],
       "vector_search": [],
@@ -2743,8 +2744,8 @@
       "total_articles_processed": 25,
       "total_legal_citations": 85,
       "constitutional_parts_identified": [
-        "IV",
         "in",
+        "IV",
         "is",
         "III"
       ],
@@ -2848,6 +2849,6 @@
       }
     }
   },
-  "timestamp": "2025-09-26T20:10:33.450728",
+  "timestamp": "2025-10-02T06:28:07.691038",
   "version": "3.2_constitutional_ultimate"
 }

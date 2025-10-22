@@ -7,7 +7,7 @@
     "total_images": 0,
     "total_citations": 85,
     "processing_time": 0,
-    "last_processed": "2025-09-26T20:10:33.450728",
+    "last_processed": "2025-10-02T06:28:07.691038",
     "document_index": {
       "fundamental rights pdf.pdf": {
         "hash": "6f379f722a28af72086c78778c7c8c2d",
@@ -47,10 +47,10 @@
       }
     },
     "error_count": 0,
-    "failed_documents": 0,
-    "processing_time_seconds": 271.142265,
-    "throughput_docs_per_minute": 0.2212860470129952,
     "success_rate": 100.0,
+    "failed_documents": 0,
+    "processing_time_seconds": 388.445835,
+    "throughput_docs_per_minute": 0.15446168962012427,
     "storage_results": {
       "texts": {
         "stored": 66,
@@ -70,7 +70,7 @@
           "cross_reference_vectors": 8,
           "deduplication_hits": 0
         },
-        "processing_time_ms": 18299.209594726562
+        "processing_time_ms": 16773.45061302185
       },
       "citations": {
         "stored": 85,
@@ -90,7 +90,7 @@
           "cross_reference_vectors": 0,
           "deduplication_hits": 0
         },
-        "processing_time_ms": 804.189920425415
+        "processing_time_ms": 770.1632976531982
       }
     },
     "documents_list": [
@@ -103,8 +103,8 @@
       "total_articles_processed": 25,
       "total_legal_citations": 85,
       "constitutional_parts_identified": [
-        "IV",
         "in",
+        "IV",
         "is",
         "III"
       ],
@@ -113,31 +113,31 @@
     "constitutional_completeness": {
       "parts_coverage": 18.181818181818183,
       "missing_parts": [
-        "VII",
-        "V",
-        "XX",
-        "VIII",
-        "XVIII",
-        "XIX",
+        "II",
+        "IX",
         "X",
         "XVII",
-        "XI",
-        "XII",
-        "II",
+        "XIX",
+        "XVI",
+        "XX",
         "VI",
         "XIII",
-        "IX",
-        "XXI",
-        "I",
         "XV",
+        "VIII",
+        "XI",
+        "V",
+        "XVIII",
+        "XXII",
+        "I",
+        "VII",
         "XIV",
-        "XVI",
-        "XXII"
+        "XXI",
+        "XII"
       ],
       "found_parts": [
+        "is",
         "IV",
         "in",
-        "is",
         "III"
       ],
       "constitutional_documents_processed": 1,
@@ -149,5 +149,5 @@
       "case_law": 0.0
     }
   },
-  "timestamp": "2025-09-26T20:10:33.456733"
+  "timestamp": "2025-10-02T06:28:07.697043"
 }
