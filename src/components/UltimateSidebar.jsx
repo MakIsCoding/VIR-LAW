@@ -58,42 +58,56 @@ const UltimateSidebar = ({
   const contextMenuRef = useRef(null);
   const isUserAuthenticated = !!user;
 
-  // Initialize system monitoring
-  useEffect(() => {
-    if (isUserAuthenticated) {
-      loadSystemHealth();
-      setupRealTimeMonitoring();
-    }
-  }, [isUserAuthenticated]);
+// Stable health/stats monitoring (drop-in replacement)
 
-  // Load system health
-  const loadSystemHealth = async () => {
+// keep a stable flag across renders to prevent overlapping polls
+const pollInFlightRef = useRef(false);
+
+// initialize monitoring on auth
+useEffect(() => {
+  if (!isUserAuthenticated) return;
+
+  // immediate health fetch
+  loadSystemHealth();
+
+  // start polling and clean up on unmount/auth change
+  const stop = setupRealTimeMonitoring();
+  return () => stop();
+}, [isUserAuthenticated]);
+
+// single health fetch with a short timeout
+const loadSystemHealth = async () => {
+  try {
+    const { data } = await apiClient.get('/health', { timeout: 10000 });
+    setSystemHealth(data);
+  } catch (error) {
+    console.error('Error loading system health:', error);
+    setSystemHealth({ status: 'offline', message: 'Backend unavailable' });
+  }
+};
+
+// lightweight polling loop for health + stats
+const setupRealTimeMonitoring = () => {
+  const id = setInterval(async () => {
+    if (pollInFlightRef.current) return;
+    pollInFlightRef.current = true;
     try {
-      const response = await apiClient.get('/health');
-      setSystemHealth(response.data);
+      const [healthRes, statsRes] = await Promise.all([
+        apiClient.get('/health', { timeout: 10000 }),
+        apiClient.get('/system-stats', { timeout: 10000 }),
+      ]);
+      setSystemHealth(healthRes.data);
+      setProcessingStats(statsRes.data);
     } catch (error) {
-      console.error("Error loading system health:", error);
-      setSystemHealth({ status: "offline", message: "Backend unavailable" });
+      console.error('Error in real-time monitoring:', error);
+    } finally {
+      pollInFlightRef.current = false;
     }
-  };
+  }, 15000); // 15s cadence
 
-  // Setup real-time monitoring
-  const setupRealTimeMonitoring = () => {
-    const interval = setInterval(async () => {
-      try {
-        const [healthResponse, statsResponse] = await Promise.all([
-          apiClient.get('/health'),
-          apiClient.get('/system-stats')
-        ]);
-        setSystemHealth(healthResponse.data);
-        setProcessingStats(statsResponse.data);
-      } catch (error) {
-        console.error("Error in real-time monitoring:", error);
-      }
-    }, 30000);
+  return () => clearInterval(id);
+};
 
-    return () => clearInterval(interval);
-  };
 
   // Handle clicks outside context menu
   useEffect(() => {

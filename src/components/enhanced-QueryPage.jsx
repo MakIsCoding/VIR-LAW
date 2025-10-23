@@ -211,141 +211,168 @@ const QueryPage = () => {
     setIsLoadingResponse(true);
     setSendMessageError(null);
     const queryStartTime = Date.now();
-    
+  
     let aiResponseText = "An error occurred while getting a response from VirLaw AI.";
     let queryStats = null;
     let sources = [];
     let metadata = {};
-
+    let isConstitutionalQuery = false;
+    let savedQueryId = null;
+  
     try {
       console.log("🏛️ Processing constitutional query:", userMessage);
-
-      // Enhanced: Handle query-with-file mode
+  
+      // Handle query-with-file mode (optional attachments)
       if (queryWithFileMode && selectedFiles.length > 0) {
         await uploadFilesForQuery();
       }
-
-      // UPDATED: Constitutional detection based on content, not query type
-      const isConstitutionalQuery = userMessage.toLowerCase().includes('article') ||
-                                  userMessage.toLowerCase().includes('constitution') ||
-                                  userMessage.toLowerCase().includes('fundamental right') ||
-                                  userMessage.toLowerCase().includes('directive principle');
-
-      const endpoint = isConstitutionalQuery ? '/ultimate-query' : '/gemini-rag';
-
-      // Enhanced: Prepare request data with chat history context
-      const requestData = {
-        [endpoint.includes('ultimate-query') ? 'question' : 'prompt']: userMessage,
+  
+      // Detect constitutional phrasing
+      isConstitutionalQuery =
+        userMessage.toLowerCase().includes("article") ||
+        userMessage.toLowerCase().includes("constitution") ||
+        userMessage.toLowerCase().includes("fundamental right") ||
+        userMessage.toLowerCase().includes("directive principle");
+  
+      const endpoint = isConstitutionalQuery ? "/ultimate-query" : "/gemini-rag";
+  
+      // Build chat context (last 10 turns)
+      const chat_history = messages.slice(-10).map((msg) => ({
+        role: msg.sender === "user" ? "user" : "assistant",
+        content: msg.text,
+      }));
+  
+      // Base payload shared by both endpoints
+      const basePayload = {
         query_type: queryType,
         confidence_threshold: confidenceThreshold,
         include_sources: includeSourcesMode,
-        // NEW: Add chat history for contextual understanding (last 10 messages)
-        chat_history: messages.slice(-10).map(msg => ({
-        role: msg.sender === "user" ? "user" : "assistant",
-        content: msg.text
-        })),
-        // Preserve existing file functionality
-        ...(tempUploadedFiles.length > 0 && { temp_files: tempUploadedFiles })
+        chat_history,
+        ...(tempUploadedFiles.length > 0 ? { temp_files: tempUploadedFiles } : {}),
       };
-
-      const ragResponse = await apiClient.post(endpoint, requestData);
-      const data = ragResponse.data;
-
-      aiResponseText = data.response;
-      sources = data.sources || [];
+  
+      // Each endpoint expects a different key for the user text
+      const payload =
+        endpoint === "/ultimate-query"
+          ? {
+              ...basePayload,
+              question: userMessage,
+              // backend also supports include_citations
+              include_citations: includeSourcesMode,
+            }
+          : {
+              ...basePayload,
+              prompt: userMessage,
+            };
+  
+      // Send request
+      const { data } = await apiClient.post(endpoint, payload);
+  
+      aiResponseText = data.response || "";
+      sources = Array.isArray(data.sources) ? data.sources : [];
       metadata = data.metadata || {};
-
-      const constitutionalAnalysis = data.constitutional_analysis || data.legal_analysis || {};
-
+      savedQueryId = data.query_id || null;
+  
+      const constitutionalAnalysis =
+        data.constitutional_analysis || data.legal_analysis || {};
+  
       const processingTime = Date.now() - queryStartTime;
       queryStats = {
         processing_time_ms: processingTime,
-        confidence: data.confidence || 0.8,
+        confidence: data.confidence ?? 0.8,
         sources_found: sources.length,
-        query_id: data.query_id,
+        query_id: savedQueryId,
         query_type: queryType,
         model_used: metadata.model_used || "unknown",
         timestamp: new Date().toISOString(),
         constitutional_analysis: constitutionalAnalysis,
         constitutional_query: isConstitutionalQuery,
         chat_context_used: metadata.chat_context_used || false,
-        context_messages_count: metadata.context_messages_count || 0
+        context_messages_count:
+          metadata.context_messages_count ?? chat_history.length,
       };
-
+  
       setLastQueryStats(queryStats);
-      setCurrentQueryId(data.query_id);
-
+      if (savedQueryId) setCurrentQueryId(savedQueryId);
+  
+      // Clear temporary upload state after successful call
       if (tempUploadedFiles.length > 0) {
         setTempUploadedFiles([]);
         setSelectedFiles([]);
       }
-
+  
       console.log("✅ Constitutional response received:", {
         response_length: aiResponseText.length,
         sources_count: sources.length,
         confidence: data.confidence,
-        constitutional_analysis: !!constitutionalAnalysis,
         processing_time: processingTime,
+        constitutional_analysis: !!constitutionalAnalysis,
         chat_context_used: queryStats.chat_context_used,
-        context_messages: queryStats.context_messages_count
+        context_messages: queryStats.context_messages_count,
       });
-
     } catch (ragError) {
       console.error("Error calling constitutional RAG API:", ragError);
       const processingTime = Date.now() - queryStartTime;
-      
+  
       queryStats = {
         processing_time_ms: processingTime,
         confidence: 0.0,
         sources_found: 0,
         error: true,
-        error_type: ragError.response?.status || "network_error",
+        error_type: ragError?.response?.status || "network_error",
         timestamp: new Date().toISOString(),
         constitutional_query: isConstitutionalQuery,
         chat_context_used: false,
-        context_messages_count: 0
+        context_messages_count: 0,
       };
-
-      if (ragError.response) {
+  
+      if (ragError?.response) {
         aiResponseText = `VirLaw AI: Failed to get constitutional analysis (Code: ${ragError.response.status}). Please check the backend connection.`;
-      } else if (ragError.request) {
-        aiResponseText = "VirLaw AI: No response from the constitutional AI server. Please ensure the backend is running.";
+      } else if (ragError?.request) {
+        aiResponseText =
+          "VirLaw AI: No response from the constitutional AI server. Please ensure the backend is running.";
       } else {
         aiResponseText = `VirLaw AI: Error sending constitutional query: ${ragError.message}`;
       }
-
+  
       setSendMessageError(aiResponseText);
       setLastQueryStats(queryStats);
     } finally {
       setIsLoadingResponse(false);
     }
-
-    // Store enhanced AI response with constitutional metadata + context tracking
+  
+    // Persist assistant message with rich metadata
     try {
-      await addDoc(collection(db, "users", currentUserId, "querySessions", sessionId, "messages"), {
-        text: aiResponseText,
-        sender: "bot",
-        createdAt: serverTimestamp(),
-        metadata: {
-          sources: sources,
-          query_stats: queryStats,
-          query_type: queryType,
-          confidence: queryStats?.confidence || 0.0,
-          query_id: currentQueryId,
-          constitutional_analysis: queryStats?.constitutional_analysis || {},
-          files_used: tempUploadedFiles.length > 0 ? tempUploadedFiles.map(f => f.filename) : [],
-          chat_context_metadata: {
-            context_used: queryStats?.chat_context_used || false,
-            context_messages_count: queryStats?.context_messages_count || 0,
-            conversation_continuity: messages.length > 1
-          }
+      await addDoc(
+        collection(db, "users", currentUserId, "querySessions", sessionId, "messages"),
+        {
+          text: aiResponseText,
+          sender: "bot",
+          createdAt: serverTimestamp(),
+          metadata: {
+            sources,
+            query_stats: queryStats,
+            query_type: queryType,
+            confidence: queryStats?.confidence ?? 0.0,
+            query_id: savedQueryId,
+            constitutional_analysis: queryStats?.constitutional_analysis || {},
+            files_used:
+              tempUploadedFiles.length > 0
+                ? tempUploadedFiles.map((f) => f.filename)
+                : [],
+            chat_context_metadata: {
+              context_used: queryStats?.chat_context_used || false,
+              context_messages_count: queryStats?.context_messages_count || 0,
+              conversation_continuity: messages.length > 1,
+            },
+          },
         }
-      });
+      );
     } catch (error) {
       console.error("Error saving AI response to Firestore:", error);
     }
   };
-
+  
   // ADDED: Missing file handling functions
   const uploadFilesForQuery = async () => {
     if (selectedFiles.length === 0) return;
