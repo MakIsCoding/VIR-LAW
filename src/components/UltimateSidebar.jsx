@@ -7,8 +7,7 @@ import {
   collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc,
   updateDoc, deleteDoc, writeBatch,
 } from "firebase/firestore";
-import axios from "axios";
-import { API_BASE_URL } from '../config/api';
+import { apiClient } from '../config/api';
 import {
   ChatBubbleLeftRightIcon, HomeIcon, Cog6ToothIcon, XMarkIcon,
   EllipsisVerticalIcon, ShareIcon, MapPinIcon, PencilIcon, TrashIcon,
@@ -70,7 +69,7 @@ const UltimateSidebar = ({
   // Load system health
   const loadSystemHealth = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/health`);
+      const response = await apiClient.get('/health');
       setSystemHealth(response.data);
     } catch (error) {
       console.error("Error loading system health:", error);
@@ -83,8 +82,8 @@ const UltimateSidebar = ({
     const interval = setInterval(async () => {
       try {
         const [healthResponse, statsResponse] = await Promise.all([
-          axios.get(`${API_BASE_URL}/health`),
-          axios.get(`${API_BASE_URL}/system-stats`)          
+          apiClient.get('/health'),
+          apiClient.get('/system-stats')
         ]);
         setSystemHealth(healthResponse.data);
         setProcessingStats(statsResponse.data);

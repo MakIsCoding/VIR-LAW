@@ -1,8 +1,7 @@
 // ENHANCED DocumentManagementPage.jsx - Constitutional intelligence for processing only
 import React, { useState, useEffect, useCallback } from "react";
 import { auth } from "../firebase";
-import { apiClient, API_BASE_URL, HF_TOKEN } from '../config/api';
-import axios from "axios";
+import { apiClient } from '../config/api';
 import {
   DocumentPlusIcon, DocumentIcon, TrashIcon, ArrowUpTrayIcon,
   CheckCircleIcon, ExclamationTriangleIcon, ClockIcon,
@@ -137,10 +136,9 @@ const DocumentManagementPage = () => {
         }));
       });
 
-      const response = await axios.post(`${API_BASE_URL}/upload-documents`, formData, {
+      const response = await apiClient.post('/upload-documents', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          ...(HF_TOKEN && { 'Authorization': `Bearer ${HF_TOKEN}` })
+          'Content-Type': 'multipart/form-data'
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
